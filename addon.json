@@ -1,0 +1,17 @@
+{
+    "title": "TARDIS (alpha)",
+    "type": "vehicle",
+    "tags": [ "roleplay", "fun" ],
+    "ignore":
+    [
+        "*.md",
+        "*.txt",
+        "*.fgd",
+        "*.psd",
+        "*.vcproj",
+        "*.svn*",
+        "*.git*",
+        ".vscode*",
+        "CODEOWNERS"
+    ]
+}
