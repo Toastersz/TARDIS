@@ -12,6 +12,8 @@
         "*.svn*",
         "*.git*",
         ".vscode*",
+        "*.sh",
+        "*.gma",
         "CODEOWNERS"
     ]
 }
