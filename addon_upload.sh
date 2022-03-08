@@ -4,3 +4,4 @@
 [[ ! -f ./tardis_alpha.gma ]] && echo "File tardis_alpha.gma does not exist! Aborting." && exit 2
 
 gmpublish update -id 2650203837 -addon tardis_alpha.gma -changes "$*"
+[[ $? = 0 ]] && mv tardis_alpha.gma tardis_alpha.gma.uploaded
