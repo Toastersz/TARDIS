@@ -50,7 +50,7 @@ function TARDIS:SpawnTARDIS(ply, customData)
     end
     local entity = SpawnFunction(sent, ply, tr, entityName, customData)
 
-    if IsValid(entity) then
+    if IsValid(entity) and IsValid(ply) then
         entity:SetCreator(ply)
     end
 
