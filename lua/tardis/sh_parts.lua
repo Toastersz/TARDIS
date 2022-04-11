@@ -28,10 +28,14 @@ function TARDIS.DrawOverride(self,override)
             if self.PreDraw then self:PreDraw() end
             if self.UseTransparencyFix and (not override) then
                 render.SetBlend(0)
-                self.o.Draw(self)
+                if self.o.Draw ~= TARDIS.DrawOverride then
+                    self.o.Draw(self)
+                end
                 render.SetBlend(1)
             else
-                self.o.Draw(self)
+                if self.o.Draw ~= TARDIS.DrawOverride then
+                    self.o.Draw(self)
+                end
             end
             if self.PostDraw then self:PostDraw() end
             self.parent:CallHook("DrawPart",self)
