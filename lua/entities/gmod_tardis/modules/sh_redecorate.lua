@@ -1,10 +1,3 @@
-TARDIS:AddSetting({
-    id="redecorate-interior",
-    name="Redecoration interior",
-    value=false,
-    networked=true
-})
-
 local ext_saved_data_names = {
     "cloak",
     "floatfirst",
@@ -30,7 +23,7 @@ if SERVER then
 
     function ENT:Redecorate()
 
-        local ply = self:GetCreator()
+        local ply = self:GetCreatorAdv()
 
         self:SetData("repairing", false, true)
         self:ChangeHealth(TARDIS:GetSetting("health-max"))
@@ -152,7 +145,7 @@ if SERVER then
             self:SetFastRemat(true)
             self:Mat()
 
-            local ply = self:GetCreator()
+            local ply = self:GetCreatorAdv()
             if ply and ply.linked_tardis == parent then
                 ply.linked_tardis = self
                 net.Start("Sonic-SetLinkedTARDIS")
@@ -184,7 +177,7 @@ else -- CLIENT
     end)
 
     ENT:OnMessage("redecorate-reset", function(self)
-        if not IsValid(self) or (not LocalPlayer() == self:GetCreator()) then return end
-        TARDIS:SetSetting("redecorate-interior",false,true)
+        if not IsValid(self) or (not LocalPlayer() == self:GetCreatorAdv()) then return end
+        TARDIS:SetSetting("redecorate-interior", false)
     end)
 end

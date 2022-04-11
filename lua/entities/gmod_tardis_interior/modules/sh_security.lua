@@ -1,15 +1,5 @@
 -- Security System (Isomorphic)
 
-TARDIS:AddSetting({
-    id="security",
-    name="Isomorphic Security on by default",
-    value=false,
-    type="bool",
-    networked=true,
-    option=true,
-    desc="Whether or not others can use your TARDIS' controls by default."
-})
-
 function ENT:GetSecurity()
     return self:GetData("security", false)
 end
@@ -29,12 +19,12 @@ end
 
 ENT:AddHook("Initialize","security", function(self)
     if not self:GetData("security") then
-        self:SetData("security", TARDIS:GetSetting("security",false,self:GetCreator()), true)
+        self:SetData("security", TARDIS:GetSetting("security", self), true)
     end
 end)
 
 ENT:AddHook("CanUsePart","security",function(self,part,ply)
-    if self:GetSecurity() and (ply~=self:GetCreator()) then
+    if self:GetSecurity() and (ply~=self:GetCreatorAdv()) then
         if part.BypassIsomorphic then return end
         TARDIS:Message(ply, "This TARDIS uses Isomorphic Security. You may not use any controls.")
         return false,false
