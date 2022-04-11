@@ -1,5 +1,27 @@
 -- Failed teleport, interrupted teleport, effects
 
+TARDIS:AddSetting({
+    id="teleport-door-autoclose",
+    name="Auto-Close Doors at Demat",
+    desc="Should TARDIS close doors automatically before demat?",
+    section="Misc",
+    value=false,
+    type="bool",
+    option=true,
+    networked=true
+})
+
+TARDIS:AddSetting({
+    id="breakdown-effects",
+    name="Breakdown Effects",
+    desc="Should TARDIS have sparkling and explosion effects in emergency moments?",
+    section="Misc",
+    value=true,
+    type="bool",
+    option=true,
+    networked=true
+})
+
 if SERVER then
 
     function ENT:HandleNoDemat(pos, ang, callback, force)
@@ -70,9 +92,30 @@ if SERVER then
         self:SetData("failed-mat-destination-ang", nil)
     end)
 
+    function ENT:StopTeleportSounds()
+        local ext = self.metadata.Exterior.Sounds.Teleport
+        local int = self.metadata.Interior.Sounds.Teleport
+
+        self:StopSound(ext.demat_damaged)
+        self:StopSound(ext.demat)
+        self:StopSound(ext.demat_fail)
+        self:StopSound(ext.mat_damaged)
+        self:StopSound(ext.mat)
+        self:StopSound(ext.fullflight)
+        self:StopSound(ext.fullflight_damaged)
+
+        self.interior:StopSound(int.demat_damaged or ext.demat_damaged)
+        self.interior:StopSound(int.demat or ext.demat)
+        self.interior:StopSound(int.demat_fail or ext.demat_fail)
+        self.interior:StopSound(int.mat_damaged or ext.mat_damaged)
+        self.interior:StopSound(int.mat or ext.mat)
+        self.interior:StopSound(int.fullflight or ext.fullflight)
+        self.interior:StopSound(int.fullflight_damaged or ext.fullflight_damaged)
+    end
+
     ENT:AddHook("ShouldFailDemat", "doors", function(self, force)
         if self:GetData("doorstatereal") and force ~= true
-            and not TARDIS:GetSetting("teleport-door-autoclose", self)
+            and not TARDIS:GetSetting("teleport-door-autoclose", false, self:GetCreator())
         then
             return true
         end
@@ -164,6 +207,8 @@ if SERVER then
             end
         end
 
+        self:StopTeleportSounds()
+
         self:Explode()
         self.interior:Explode(20)
 
@@ -172,7 +217,12 @@ if SERVER then
             self.interior:Explode(20)
         end)
 
-        self:SendMessage("interrupt-teleport")
+        if TARDIS:GetSetting("teleport-sound") and TARDIS:GetSetting("sound") then
+            local ext = self.metadata.Exterior.Sounds.Teleport
+            local int = self.metadata.Interior.Sounds.Teleport
+            self:EmitSound(ext.interrupt)
+            self.interior:EmitSound(int.interrupt or ext.interrupt)
+        end
 
         self:SetData("demat-pos",nil,true)
         self:SetData("demat-ang",nil,true)
@@ -263,37 +313,6 @@ else -- CLIENT
         end
     end)
 
-    function ENT:StopTeleportSounds()
-        local ext = self.metadata.Exterior.Sounds.Teleport
-        local int = self.metadata.Interior.Sounds.Teleport
-
-        self:StopSound(ext.demat_damaged)
-        self:StopSound(ext.demat)
-        self:StopSound(ext.demat_fail)
-        self:StopSound(ext.mat_damaged)
-        self:StopSound(ext.mat)
-        self:StopSound(ext.fullflight)
-        self:StopSound(ext.fullflight_damaged)
-
-        self.interior:StopSound(int.demat_damaged or ext.demat_damaged)
-        self.interior:StopSound(int.demat or ext.demat)
-        self.interior:StopSound(int.demat_fail or ext.demat_fail)
-        self.interior:StopSound(int.mat_damaged or ext.mat_damaged)
-        self.interior:StopSound(int.mat or ext.mat)
-        self.interior:StopSound(int.fullflight or ext.fullflight)
-        self.interior:StopSound(int.fullflight_damaged or ext.fullflight_damaged)
-    end
-
-    ENT:OnMessage("interrupt-teleport", function(self)
-        self:StopTeleportSounds()
-        if TARDIS:GetSetting("teleport-sound") and TARDIS:GetSetting("sound") then
-            local ext = self.metadata.Exterior.Sounds.Teleport
-            local int = self.metadata.Interior.Sounds.Teleport
-            self:EmitSound(ext.interrupt)
-            self.interior:EmitSound(int.interrupt or ext.interrupt)
-        end
-    end)
-
     ENT:OnMessage("engine-release-explode", function(self)
         self:InteriorExplosion()
     end)
@@ -352,7 +371,7 @@ ENT:AddHook("Think","breakdown-effects", function(self)
 
         local showeffects = (CLIENT and LocalPlayer():GetTardisData("exterior") == self
             and (not LocalPlayer():GetTardisData("thirdperson"))
-            and TARDIS:GetSetting("breakdown-effects"))
+            and TARDIS:GetSetting("breakdown-effects", true, LocalPlayer()))
 
         if showeffects then
             local effpos
@@ -403,7 +422,7 @@ ENT:AddHook("Think","interrupted-teleport", function(self)
         local showeffects = (CLIENT and self:GetData("teleport-interrupt-effects", false)
                 and LocalPlayer():GetTardisData("exterior") == self
                 and (not LocalPlayer():GetTardisData("thirdperson"))
-                and TARDIS:GetSetting("breakdown-effects"))
+                and TARDIS:GetSetting("breakdown-effects", true, LocalPlayer()))
 
         if showeffects then
             if math.Round(10 * CurTime()) % 2 == 0 then

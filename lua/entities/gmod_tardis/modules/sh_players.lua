@@ -1,9 +1,5 @@
 -- Handles players
 
-ENT:AddHook("Initialize", "save_creator", function(self)
-    ENT:SaveCreator()
-end)
-
 if SERVER then
     util.AddNetworkString("TARDIS-PlayerData")
     util.AddNetworkString("TARDIS-PlayerDataClear")

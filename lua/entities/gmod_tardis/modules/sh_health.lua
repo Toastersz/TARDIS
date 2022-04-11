@@ -1,5 +1,8 @@
 -- Health
 
+CreateConVar("tardis2_maxhealth", 1000, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "TARDIS - Maximum health")
+CreateConVar("tardis2_damage", 1, {FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY}, "TARDIS - Damage enabled (1 enables, 0 disables)", 0, 1)
+
 concommand.Add("tardis2_debug_warning", function(ply,cmd,args)
     local ext = ply:GetTardisData("exterior")
     if not ext or not ply:IsAdmin() then return end
@@ -14,18 +17,33 @@ concommand.Add("tardis2_debug_warning", function(ply,cmd,args)
     ext:CallHook("OnHealthChange", val, oldval)
 end)
 
+TARDIS:AddSetting({
+    id="health-enabled",
+    name="Enable Health",
+    desc="Should the TARDIS have health and take damage?",
+    section="Health",
+    value=true,
+    type="bool",
+    setting=true,
+    networked=true
+})
+
+TARDIS:AddSetting({
+    id="health-max",
+    name="Max Health",
+    desc="Maximum ammount of health the TARDIS has",
+    section="Misc",
+    type="number",
+    value=1000,
+    min=1,
+    max=50000,
+    networked=true
+})
+
 ENT:AddHook("Initialize","health-init",function(self)
     self:SetData("health-val", TARDIS:GetSetting("health-max"), true)
     if SERVER and WireLib then
         self:TriggerWireOutput("Health", self:GetHealth())
-    end
-end)
-
-ENT:AddHook("GlobalSettingChanged","maxhealth-changed", function(self, id, val)
-    if id ~= "health-max" then return end
-
-    if self:GetHealth() > val then
-        self:ChangeHealth(val)
     end
 end)
 
@@ -41,11 +59,13 @@ function ENT:ChangeHealth(newhealth)
     if newhealth <= 0 then
         newhealth = 0
         if newhealth == 0 and not (newhealth == oldhealth) then
-            self:CallCommonHook("OnHealthDepleted")
+            self:CallHook("OnHealthDepleted")
+            if self.interior then self.interior:CallHook("OnHealthDepleted") end
         end
     end
     self:SetData("health-val", newhealth, true)
-    self:CallCommonHook("OnHealthChange", newhealth, oldhealth)
+    self:CallHook("OnHealthChange", newhealth, oldhealth)
+    if self.interior then self.interior:CallHook("OnHealthChange", newhealth, oldhealth) end
 end
 
 function ENT:GetHealth()
@@ -54,7 +74,7 @@ end
 
 function ENT:GetHealthPercent()
     local val = self:GetData("health-val", 0)
-    local percent = (val * 100)/TARDIS:GetSetting("health-max")
+    local percent = (val * 100)/TARDIS:GetSetting("health-max",1)
     return percent
 end
 
@@ -63,6 +83,23 @@ function ENT:GetRepairTime()
 end
 
 if SERVER then
+    cvars.AddChangeCallback("tardis2_maxhealth", function(cvname, oldvalue, newvalue)
+        local nvnum = tonumber(newvalue)
+        if nvnum < 0 then
+            nvnum = 1
+        end
+        TARDIS:SetSetting("health-max", nvnum, true)
+        for k,v in pairs(ents.FindByClass("gmod_tardis")) do
+            if v:GetHealth() > nvnum then
+                v:ChangeHealth(nvnum)
+            end
+        end
+    end, "UpdateOnChange")
+
+    cvars.AddChangeCallback("tardis2_damage", function(cvname, oldvalue, newvalue)
+       TARDIS:SetSetting("health-enabled", tobool(newvalue), true)
+    end, "UpdateOnChange")
+
     ENT:AddWireOutput("Health", "TARDIS Health")
 
     function ENT:Explode(f)
@@ -83,8 +120,8 @@ if SERVER then
         return self:SetRepair(on)
     end
     function ENT:SetRepair(on)
-        if not TARDIS:GetSetting("health-enabled") and self:GetHealth()~=TARDIS:GetSetting("health-max") then 
-            self:ChangeHealth(TARDIS:GetSetting("health-max"))
+        if not TARDIS:GetSetting("health-enabled") and self:GetHealth()~=TARDIS:GetSetting("health-max",1) then 
+            self:ChangeHealth(TARDIS:GetSetting("health-max"),1)
             return false
         end
         if self:CallHook("CanRepair")==false then return false end
@@ -114,9 +151,7 @@ if SERVER then
     function ENT:StartRepair()
         if not IsValid(self) then return end
         self:SetLocked(true,nil,true)
-        local maxhealth = TARDIS:GetSetting("health-max")
-        local curhealth = self:GetData("health-val")
-        local time = CurTime() + ( math.Clamp((maxhealth - curhealth) * 0.1, 1, 60) )
+        local time = CurTime()+(math.Clamp((TARDIS:GetSetting("health-max")-self:GetData("health-val"))*0.1, 1, 60))
         self:SetData("repair-time", time, true)
         self:SetData("repairing", true, true)
         self:SetData("repair-primed", false, true)
@@ -125,6 +160,7 @@ if SERVER then
 
     function ENT:FinishRepair()
         if self:CallHook("ShouldRedecorate") and self:Redecorate() then
+            
             return
         end
         self:EmitSound(self.metadata.Exterior.Sounds.RepairFinish)
@@ -133,7 +169,7 @@ if SERVER then
         self:CallHook("RepairFinished")
         self:SetPower(true)
         self:SetLocked(false, nil, true)
-        TARDIS:Message(self:GetCreatorAdv(), "Your TARDIS has finished self-repairing")
+        TARDIS:Message(self:GetCreator(), "Your TARDIS has finished self-repairing")
         self:StopSmoke()
         self:FlashLight(1.5)
     end
@@ -174,7 +210,7 @@ if SERVER then
 
     ENT:AddHook("CanRepair", "health", function(self)
         if self:GetData("vortex", false) then return false end
-        if (self:GetHealth() >= TARDIS:GetSetting("health-max"))
+        if (self:GetHealth() >= TARDIS:GetSetting("health-max", 1))
             and not self:CallHook("ShouldRedecorate")
         then
             return false
@@ -308,14 +344,20 @@ if SERVER then
     ENT:AddHook("OnHealthChange", "warning", function(self)
         if self:GetHealthPercent() <= 20 and (not self:GetData("health-warning",false)) then
             self:SetData("health-warning", true, true)
-            self:CallCommonHook("HealthWarningToggled",true)
+            self:CallHook("HealthWarningToggled",true)
+            if self.interior then
+                self.interior:CallHook("HealthWarningToggled",true)
+            end
         end
     end)
 
     ENT:AddHook("OnHealthChange", "warning-stop", function(self)
         if self:GetHealthPercent() > 20 and (self:GetData("health-warning",false)) then
             self:SetData("health-warning", false, true)
-            self:CallCommonHook("HealthWarningToggled", false)
+            self:CallHook("HealthWarningToggled",false)
+            if self.interior then
+                self.interior:CallHook("HealthWarningToggled",false)
+            end
         end
     end)
 

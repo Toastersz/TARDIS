@@ -2,7 +2,7 @@
 
 -- Binds
 TARDIS:AddKeyBind("float-toggle",{
-    name="Toggle Float",
+    name="Float Toggle",
     section="Third Person",
     desc="Lets the TARDIS fly as if there is no gravity",
     func=function(self,down,ply)

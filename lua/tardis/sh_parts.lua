@@ -28,14 +28,10 @@ function TARDIS.DrawOverride(self,override)
             if self.PreDraw then self:PreDraw() end
             if self.UseTransparencyFix and (not override) then
                 render.SetBlend(0)
-                if self.o.Draw ~= TARDIS.DrawOverride then
-                    self.o.Draw(self)
-                end
+                self.o.Draw(self)
                 render.SetBlend(1)
             else
-                if self.o.Draw ~= TARDIS.DrawOverride then
-                    self.o.Draw(self)
-                end
+                self.o.Draw(self)
             end
             if self.PostDraw then self:PostDraw() end
             self.parent:CallHook("DrawPart",self)
@@ -290,7 +286,7 @@ if SERVER then
         end
         for k,v in pairs(tempparts) do
             local e=ents.Create(v)
-            Doors:SetupOwner(e,ent:GetCreatorAdv())
+            Doors:SetupOwner(e,ent:GetCreator())
             e.exterior=(ent.TardisExterior and ent or ent.exterior)
             e.interior=(ent.TardisInterior and ent or ent.interior)
             e.parent=ent

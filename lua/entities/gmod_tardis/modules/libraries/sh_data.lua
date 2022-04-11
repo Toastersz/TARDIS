@@ -64,10 +64,7 @@ function ENT:SetData(k,v,network)
 end
 
 function ENT:GetData(k,default)
-    if self.data and self.data[k] ~= nil then
-        return self.data[k]
-    end
-    return default
+    return (self.data and self.data[k]~=nil) and self.data[k] or default
 end
 
 function ENT:ClearData()

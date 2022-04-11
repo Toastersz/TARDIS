@@ -108,7 +108,7 @@ function TARDIS:MergeInteriorTemplates(cur_metadata, apply_conditions, ent)
 
         if template and template_metadata
             and ((not apply_conditions and not template.condition)
-                or (apply_conditions and template.condition and template.condition(id, ent:GetCreatorAdv(), ent)))
+                or (apply_conditions and template.condition and template.condition(id, ent:GetCreator(), ent)))
         then
             if template.parts_rotation then
                 template_metadata = AddInteriorPartsRotation(template_metadata, template.parts_rotation)
@@ -126,14 +126,14 @@ function TARDIS:MergeInteriorTemplates(cur_metadata, apply_conditions, ent)
         elseif not template_metadata then
             if not template or not template.ignore_missing then
                 local err_notification = "[TARDIS] Failed to find template " .. template_id .. " required for interior " .. id
-                if CLIENT and LocalPlayer() and LocalPlayer().ChatPrint then
+                if CLIENT then
                     LocalPlayer():ChatPrint(err_notification)
                 else
                     ErrorNoHalt("\n" .. err_notification)
                 end
             end
             if template and template.fail_msg then
-                if CLIENT and LocalPlayer() and LocalPlayer().ChatPrint then
+                if CLIENT then
                     LocalPlayer():ChatPrint(template.fail_msg)
                 else
                     print("\n" .. template.fail_msg .. "\n")

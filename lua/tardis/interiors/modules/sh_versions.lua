@@ -1,3 +1,14 @@
+TARDIS:AddSetting({
+    id="use_classic_door_interiors",
+    name="Use classic door interiors by default",
+    value=true,
+    type="bool",
+    networked=true,
+    option=true,
+    section="Misc",
+    desc="Whether classic (big) door versions of interiors will spawn by default"
+})
+
 function TARDIS:InitializeVersions(int_id)
     local versions = self.Metadata[int_id].Versions or {}
 
@@ -14,7 +25,7 @@ function TARDIS:InitializeVersions(int_id)
 end
 
 function TARDIS:ShouldUseClassicDoors(ply)
-    return TARDIS:GetSetting("use_classic_door_interiors", ply)
+    return TARDIS:GetSetting("use_classic_door_interiors", true, ply)
 end
 
 function TARDIS:SelectDoorVersionID(x, ply)
@@ -42,20 +53,25 @@ function TARDIS:SelectDoorVersionID(x, ply)
 end
 
 
-function TARDIS:DefaultPreferredVersion(int_id)
+function TARDIS:InitPreferredVersionSetting(int_id, ply)
     local int_id = TARDIS:GetMainVersionId(int_id)
     local metadata = self.Metadata[int_id]
     local versions = metadata and metadata.Versions
 
-    if versions and versions.randomize_custom and not table.IsEmpty(versions.custom) then
-        return "random_custom"
+    local preferred_version = "main"
+
+    if versions and versions.randomize and versions.randomize_custom
+        and not table.IsEmpty(versions.custom)
+    then
+        preferred_version = "random_custom"
+    elseif versions and versions.randomize
+        and not table.IsEmpty(versions.other)
+    then
+        preferred_version = "random"
     end
 
-    if versions and versions.randomize and not table.IsEmpty(versions.other) then
-        return "random"
-    end
-
-    return "main"
+    TARDIS:SetCustomSetting(int_id, "preferred_version", preferred_version, ply)
+    return preferred_version
 end
 
 function TARDIS:SelectSpawnID(id, ply)

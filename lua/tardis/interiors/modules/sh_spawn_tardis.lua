@@ -1,3 +1,27 @@
+TARDIS:AddSetting({
+    id="randomize_skins",
+    name="Randomize TARDIS skins at spawn",
+    value=true,
+    type="bool",
+    networked=true,
+    option=true,
+    section="Misc",
+    desc="Whether or not TARDIS skin will be randomized when it's spawned"
+})
+
+TARDIS:AddSetting({
+    id="winter_skins",
+    name="Use winter skins while randomizing TARDIS skins at spawn",
+    value=false,
+    type="bool",
+    networked=true,
+    option=true,
+    section="Misc",
+    desc="Whether or not winter TARDIS skins will be used while it's randomized"
+})
+
+if CLIENT then return end
+
 function TARDIS:SpawnTARDIS(ply, customData)
     local entityName = "gmod_tardis"
 
@@ -26,7 +50,7 @@ function TARDIS:SpawnTARDIS(ply, customData)
     end
     local entity = SpawnFunction(sent, ply, tr, entityName, customData)
 
-    if IsValid(entity) and IsValid(ply) then
+    if IsValid(entity) then
         entity:SetCreator(ply)
     end
 
@@ -53,14 +77,14 @@ function TARDIS:SpawnTARDIS(ply, customData)
     ply:AddCleanup("sents", entity)
     entity:SetVar("Player", ply)
 
-    if TARDIS:GetSetting("randomize_skins", entity) then
+    if TARDIS:GetSetting("randomize_skins", true, entity:GetCreator()) then
         local total_skins = entity:SkinCount()
         if total_skins then
             local chosen_skin = math.random(total_skins)
 
             local excluded = entity.metadata.Exterior.ExcludedSkins
             local winter = entity.metadata.Exterior.WinterSkins
-            local winter_ok = TARDIS:GetSetting("winter_skins", entity)
+            local winter_ok = TARDIS:GetSetting("winter_skins", false, entity:GetCreator())
 
             local function cannot_use_skin(chosen_skin)
                 local is_excluded = table.HasValue(excluded, chosen_skin)

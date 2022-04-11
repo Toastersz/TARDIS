@@ -2,8 +2,8 @@
 
 
 TARDIS:AddKeyBind("cloak-toggle",{
-    name="Toggle Cloak",
-    section="Third Person",
+    name="Toggle",
+    section="Cloak",
     func=function(self,down,ply)
         if ply == self.pilot and down then
             TARDIS:Control("cloak", ply)
@@ -68,6 +68,16 @@ if SERVER then
         end
     end)
 else
+    TARDIS:AddSetting({
+        id = "cloaksound-enabled",
+        name = "Cloak Sound",
+        desc = "Toggles whether or not sounds play when TARDIS cloaking is toggled",
+        section = "Sound",
+        value = true,
+        type = "bool",
+        option = true
+    })
+
     ENT:AddHook("Initialize", "cloak-material", function(self)
         self.PhaseMaterial = Material(self.metadata.Exterior.PhaseMaterial or "models/drmatt/tardis/exterior/phase_noise.vmt")
     end)

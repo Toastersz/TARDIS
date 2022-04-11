@@ -1,5 +1,26 @@
 -- Tips
 
+TARDIS:AddSetting({
+    id="tips",
+    name="Tips",
+    desc="Should tips be shown for TARDIS controls?",
+    section="Misc",
+    value=true,
+    type="bool",
+    option=true,
+    networked=false
+})
+
+TARDIS:AddSetting({
+    id="tips_style",
+    name="Tips Style",
+    desc="Which style should the TARDIS tips use?",
+    section="Misc",
+    value="default",
+    option=false,
+    networked=false
+})
+
 function ENT:InitializeTips(style_name)
     local int_metadata = self.metadata.Interior
     local text_overrides = int_metadata.TipSettings.TextOverrides
@@ -124,7 +145,7 @@ ENT:AddHook("Initialize", "tips", function(self)
         end
     end
 
-    local style_name = TARDIS:GetSetting("tips_style")
+    local style_name = TARDIS:GetSetting("tips_style", "default")
     self:InitializeTips(style_name)
 end)
 
@@ -136,9 +157,9 @@ end)
 
 hook.Add("HUDPaint", "TARDIS-DrawTips", function()
     local interior = TARDIS:GetInteriorEnt(LocalPlayer())
-    if not (IsValid(interior) and interior.tips and TARDIS:GetSetting("tips") and (interior:CallHook("ShouldDrawTips")~=false)) then return end
+    if not (interior and interior.tips and TARDIS:GetSetting("tips") and (interior:CallHook("ShouldDrawTips")~=false)) then return end
 
-    local selected_tip_style = TARDIS:GetSetting("tips_style")
+    local selected_tip_style = TARDIS:GetSetting("tips_style", "default")
     if interior.tip_style_name ~= selected_tip_style then
         interior:InitializeTips(selected_tip_style)
     end
@@ -158,7 +179,7 @@ hook.Add("HUDPaint", "TARDIS-DrawTips", function()
     end
 
     local player_pos = LocalPlayer():EyePos()
-    local should_randomize = (interior:CallCommonHook("RandomizeTips") == true)
+    local should_randomize = (interior.exterior:CallHook("RandomizeTips") == true)
     for k,tip in ipairs(interior.tips)
     do
         local view_range_min = tip.view_range_min
