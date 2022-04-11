@@ -35,6 +35,25 @@ function ENT:GetHooksTable()
     return hooks
 end
 
+function ENT:SaveCreator()
+    local ply = self:GetCreator()
+    if IsValid(ply) then
+        self.TardisCreatorID = ply:AccountID()
+    end
+end
+
+function ENT:GetCreatorAdv()
+    local ply = self:GetCreator()
+    if IsValid(ply) then
+        return ply
+    end
+    ply = player.GetByAccountID(self.TardisCreatorID)
+    if IsValid(ply) then
+        self:SetCreator(ply)
+        return ply
+    end
+end
+
 function ENT:ListHooks(listInteriorHooks)
     print("[Exterior]"..(SERVER and "[Server]" or "[Client]"))
     for h in pairs(hooks) do
@@ -51,7 +70,7 @@ function ENT:CallCommonHook(name, ...)
         return a,b,c,d,e,f
     end
 
-    if self.interior then
+    if IsValid(self.interior) then
         a,b,c,d,e,f = self.interior:CallHook(name, ...)
         if a~=nil then
             return a,b,c,d,e,f

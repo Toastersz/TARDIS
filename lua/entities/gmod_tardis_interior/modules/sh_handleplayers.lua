@@ -1,9 +1,13 @@
 -- Handles players inside the tardis interior
 
+ENT:AddHook("Initialize", "save_creator", function(self)
+    ENT:SaveCreator()
+end)
+
 if SERVER then
     hook.Add("PlayerSpawn", "tardis-handleplayers", function(ply)
         local int=ply:GetTardisData("interior")
-        if IsValid(int) and int.TardisInterior and ply == int:GetCreator() then
+        if IsValid(int) and int.TardisInterior and ply == int:GetCreatorAdv() then
             local fallback=int.metadata.Interior.Fallback
             if fallback then
                 ply:SetPos(int:LocalToWorld(fallback.pos))
