@@ -76,11 +76,14 @@ TARDIS:AddScreen("Destination", {id="coordinates", text="Coordinates", menu=fals
     end
 
     local pendingchanges = false
+    local a = frame:GetWide()
+    local b = frame:GetTall()
+    local d = 0.05 * math.min( a,b )
 
     local list = vgui.Create("DListView",frame)
-    list:SetSize( frame:GetWide()*0.7, frame:GetTall()*0.95 )
-    list:SetPos( frame:GetWide()*0.26 - list:GetWide()*0.35, frame:GetTall()*0.5 - list:GetTall()*0.5 )
-    list:AddColumn("Name")
+    list:SetSize( (a-3*d)/2,(b-2*d) )
+    list:SetPos( d,d )
+    list:AddColumn("LOCATIONS LIST")
 
     local map = game.GetMap()
     local function updatelist()
@@ -131,19 +134,19 @@ TARDIS:AddScreen("Destination", {id="coordinates", text="Coordinates", menu=fals
 
     local new = vgui.Create("DButton", frame)
     new:SetSize( frame:GetWide()*0.08, frame:GetTall()*0.1 )
-    new:SetPos(pitch:GetPos(),frame:GetTall()*0.52 - button:GetTall()*0.5)
-    new:SetText("New")
+    new:SetPos(pitch:GetPos(),frame:GetTall()*0.9 - button:GetTall()*0.5)
+    new:SetText("Add")
     new:SetFont(TARDIS:GetScreenFont(screen, "Default"))
     function new:DoClick()
-        local name = ""
-        local pos = Vector(0,0,0)
-        local ang = Angle(0,0,0)
+
         local vortex = ext:GetData("vortex", false)
 
         local request = "Enter the name for the new location"
         if vortex then
             request = request .. " (The info from the inputs would be used)"
         end
+
+        local pos, ang, name = fetchtextinputs()
 
         Derma_StringRequest(
             "New Location",
@@ -177,32 +180,9 @@ TARDIS:AddScreen("Destination", {id="coordinates", text="Coordinates", menu=fals
         )
     end
 
-    local edit = vgui.Create("DButton", frame)
-    edit:SetSize( frame:GetWide()*0.08, frame:GetTall()*0.1 )
-    edit:SetPos(yaw:GetPos(),frame:GetTall()*0.52 - button:GetTall()*0.5)
-    edit:SetText("Update")
-    edit:SetFont(TARDIS:GetScreenFont(screen, "Default"))
-    edit:SetEnabled(false)
-    function edit:DoClick()
-        pendingchanges = true
-        local pos,ang,name = fetchtextinputs()
-        local index = list:GetSelectedLine()
-        if not index then return end
-        TARDIS:UpdateLocation(pos,ang,name,map,index)
-        updatelist()
-    end
-    function edit:Think()
-        if list:GetSelectedLine() ~= nil then
-            if self:IsEnabled() then return end
-            self:SetEnabled(true)
-        elseif self:IsEnabled() then
-            self:SetEnabled(false)
-        end
-    end
-
     local remove = vgui.Create("DButton", frame)
     remove:SetSize( frame:GetWide()*0.08, frame:GetTall()*0.1 )
-    remove:SetPos(roll:GetPos(),frame:GetTall()*0.52 - button:GetTall()*0.5)
+    remove:SetPos(roll:GetPos(),frame:GetTall()*0.9 - button:GetTall()*0.5)
     remove:SetText("Delete")
     remove:SetFont(TARDIS:GetScreenFont(screen, "Default"))
     function remove:DoClick()
@@ -221,34 +201,7 @@ TARDIS:AddScreen("Destination", {id="coordinates", text="Coordinates", menu=fals
         end
     end
 
-    local save = vgui.Create("DButton", frame)
-    save:SetSize( frame:GetWide()*0.07, frame:GetTall()*0.1 )
-    save:SetPos(frame:GetWide()*0.82 - save:GetWide()*0.5, frame:GetTall()*0.64 - save:GetTall()*0.5)
-    save:SetText("Save")
-    save:SetFont(TARDIS:GetScreenFont(screen, "Default"))
-    function save:DoClick()
-        TARDIS:SaveLocations()
-        pendingchanges = false
-        TARDIS:Message(LocalPlayer(), "Locations Saved")
-    end
-    function save:Think()
-        if pendingchanges then
-            self:SetText("Save*")
-        else
-            self:SetText("Save")
-        end
-    end
-    local load = vgui.Create("DButton", frame)
-    load:SetSize( frame:GetWide()*0.07, frame:GetTall()*0.1 )
-    load:SetPos(frame:GetWide()*0.9 - load:GetWide()*0.5, frame:GetTall()*0.64 - load:GetTall()*0.5)
-    load:SetText("Load")
-    load:SetFont(TARDIS:GetScreenFont(screen, "Default"))
-    function load:DoClick()
-        TARDIS:LoadLocations()
-        updatelist()
-        pendingchanges = false
-        TARDIS:Message(LocalPlayer(), "Locations Loaded")
-    end
+
 
     local confirm = vgui.Create("DButton",frame)
     confirm:SetSize( frame:GetWide()*0.1, frame:GetTall()*0.1 )
