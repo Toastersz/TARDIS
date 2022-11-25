@@ -25,14 +25,17 @@ if SERVER then
             if self:GetData("handbrake") then
                 self:ToggleHandbrake()
             end
+            self:SetData("hads-attempt", true)
             if self:CallHook("CanDemat", true) == false then
                 if not self:GetData("hads-failed-time") or CurTime() > self:GetData("hads-failed-time") + 10 then
                     self:SetData("hads-failed-time", CurTime())
                     TARDIS:ErrorMessage(self:GetCreator(), "HADS.DematError")
                     TARDIS:ErrorMessage(self:GetCreator(), "HADS.UnderAttack")
                 end
+                self:SetData("hads-attempt", nil)
                 return false
             end
+            self:SetData("hads-attempt", nil)
             TARDIS:Message(self:GetCreator(), "HADS.Triggered")
             TARDIS:Message(self:GetCreator(), "HADS.UnderAttack")
             self:SetData("hads-triggered", true)
@@ -64,7 +67,7 @@ if SERVER then
 
     hook.Add("OnPhysgunPickup", "tardis-hads", function(ply,ent)
         if ent:GetClass()=="gmod_tardis" and ent:TriggerHADS() then
-            ent:ForcePlayerDrop()                                                      
+            ent:ForcePlayerDrop()
         end
     end)
 
