@@ -1,4 +1,4 @@
-local SETTING_SECTION = "Admin Options"
+local SETTING_SECTION = "Global"
 
 CONVAR_FLAGS = {FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY}
 
@@ -16,8 +16,7 @@ TARDIS:AddSetting({
 
     option = true,
     section=SETTING_SECTION,
-    name="Enable Health",
-    desc="Should the TARDIS have health and take damage?",
+    name="EnableHealth",
 })
 
 TARDIS:AddSetting({
@@ -42,8 +41,94 @@ TARDIS:AddSetting({
 
     option = true,
     section=SETTING_SECTION,
-    name="Max Health",
-    desc="Maximum ammount of health the TARDIS has",
+    name="MaxHealth",
+})
+
+TARDIS:AddSetting({
+    id="long_repair",
+    type="bool",
+    value=true,
+
+    class="global",
+    convar = {
+        name = "tardis2_long_repair",
+        flags = CONVAR_FLAGS,
+        desc = "TARDIS - Whether repairing process lasts 60 seconds",
+    },
+
+    option = true,
+    section=SETTING_SECTION,
+    name="WaitLongForRepair",
+})
+
+TARDIS:AddSetting({
+    id="artron_energy",
+    type="bool",
+    value=true,
+
+    class="global",
+    convar = {
+        name = "tardis2_artron_energy",
+        flags = CONVAR_FLAGS,
+        desc = "TARDIS - Whether artron energy is enabled",
+    },
+
+    option = true,
+    section=SETTING_SECTION,
+    subsection="ArtronEnergy",
+    name="ArtronEnergyEnabled",
+})
+
+TARDIS:AddSetting({
+    id="artron_energy_start",
+    type="list",
+    value=0.25,
+    get_values_func = function()
+        return {
+            { "0%", 0.0 },
+            { "25%", 0.25 },
+            { "50%", 0.5 },
+            { "75%", 0.75 },
+            { "100%", 1.0 },
+        }
+    end,
+
+    class="global",
+    convar = {
+        name = "tardis2_artron_energy_start",
+        flags = CONVAR_FLAGS,
+        desc = "TARDIS - Initial amount of artron energy",
+    },
+
+    option=true,
+    section=SETTING_SECTION,
+    subsection="ArtronEnergy",
+    name="ArtronEnergyStart",
+})
+
+TARDIS:AddSetting({
+    id="artron_energy_max",
+    type="integer",
+    value=14400,
+    min=1800,
+    max=57600,
+    round_func = function(x)
+        if x > 20000 then return (x - x % 7200) end
+        if x > 10000 then return (x - x % 3600) end
+        return (x - x % 1800)
+    end,
+
+    class="global",
+    convar = {
+        name = "tardis2_artron_energy_max",
+        flags = CONVAR_FLAGS,
+        desc = "TARDIS - Max amount of artron energy",
+    },
+
+    option = true,
+    section=SETTING_SECTION,
+    subsection="ArtronEnergy",
+    name="ArtronEnergyMax",
 })
 
 
@@ -65,7 +150,6 @@ TARDIS:AddSetting({
     },
 
     option = true,
-    name="Boost Speed",
-    desc="The increase of speed the TARDIS gets with the boost key enabled",
     section=SETTING_SECTION,
+    name="BoostSpeed",
 })

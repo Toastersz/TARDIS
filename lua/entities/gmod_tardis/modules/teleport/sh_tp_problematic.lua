@@ -90,6 +90,9 @@ if SERVER then
 
     function ENT:InterruptTeleport(callback)
         if not self:GetData("teleport", false) and not self:GetData("vortex", false) then return end
+
+        local was_demating = self:GetData("demat", false)
+
         local door_ok = true
         self:CloseDoor(function(state)
             if state then
@@ -106,7 +109,12 @@ if SERVER then
 
         ang = self:GetAngles()
         if self:GetData("vortex", false) then
-            pos = self:GetRandomLocation(false)
+            local randomLocation = self:GetRandomLocation(false)
+            if randomLocation then
+                pos = randomLocation
+            else
+                pos = self:GetPos()
+            end
         else
             pos = self:GetPos()
         end
@@ -153,7 +161,6 @@ if SERVER then
             end
         end
 
-        self:SetBodygroup(1,1)
         self:SetData("demat-attached",nil,true)
         self:SetData("fastreturn",false)
 
@@ -164,13 +171,15 @@ if SERVER then
             end
         end
 
-        self:Explode()
-        self.interior:Explode(20)
-
-        self:Timer("interrupt_teleport", 1, function()
+        if not was_demating then
             self:Explode()
             self.interior:Explode(20)
-        end)
+
+            self:Timer("interrupt_teleport", 1, function()
+                self:Explode()
+                self.interior:Explode(20)
+            end)
+        end
 
         self:SendMessage("interrupt-teleport")
 
@@ -179,20 +188,20 @@ if SERVER then
         self:SetSolid(SOLID_VPHYSICS)
         self:SetCollisionGroup(COLLISION_GROUP_NONE)
 
-        local was_demating = self:GetData("demat", false)
         self:SetData("demat", false, true)
         self:SetData("mat", false, true)
         self:SetData("teleport", false, true)
         self:SetData("vortex", false, true)
         self:SetData("step", 1, true)
-        self:SetFlight(false)
-        self:SetFloat(false)
 
         self:CallHook("InterruptTeleport")
 
         if not was_demating then
             self:ChangeHealth(self:GetHealth() * math.random(85, 95) * 0.01)
             self:SetPower(false)
+            local flight = self:GetData("prevortex-flight", false)
+            self:SetData("power-lastflight", flight, true)
+            self:SetFloat(false)
             self:SetData("teleport-interrupted", true, true)
             self:SetData("teleport-interrupt-time", CurTime(), true)
             self:SetData("teleport-interrupt-effects", true, true)
@@ -392,7 +401,7 @@ ENT:AddHook("Think","breakdown-effects", function(self)
     end
 end)
 
-ENT:AddHook("Think","interrupted-teleport", function(self)
+ENT:AddHook("Think", "interrupted-teleport", function(self)
     if self:GetData("teleport-interrupted", false) then
         local timediff = CurTime() - self:GetData("teleport-interrupt-time")
 
@@ -422,8 +431,10 @@ ENT:AddHook("Think","interrupted-teleport", function(self)
     end
 end)
 
-ENT:AddHook("CanTogglePower","interrupted-teleport", function(self)
+ENT:AddHook("CanTogglePower", "interrupted-teleport", function(self)
     if self:GetData("teleport-interrupted", false) then
         return false
     end
 end)
+
+

@@ -60,9 +60,14 @@ if SERVER then
     end
 
     function ENT:SetRandomDestination(grounded)
-        local pos = self:GetRandomLocation(grounded)
-        local ang = Angle(0,0,0)
-        self:SetDestination(pos, ang)
+        local randomLocation = self:GetRandomLocation(grounded)
+        if randomLocation then
+            self:CallHook("RandomDestinationSet", randomLocation)
+            self:SetDestination(randomLocation, Angle(0,0,0))
+            return true
+        else
+            return false
+        end
     end
 
     function ENT:GetDestination()
@@ -77,7 +82,6 @@ if SERVER then
         self:SetData("teleport",true)
         self:SetData("alpha", 0)
 
-        self:SetBodygroup(1,0)
         self:DrawShadow(false)
         for k,v in pairs(self.parts) do
             v:DrawShadow(false)
@@ -117,7 +121,6 @@ if SERVER then
 
         pos=pos or self:GetData("demat-pos") or self:GetPos()
         ang=ang or self:GetData("demat-ang") or self:GetAngles()
-        self:SetBodygroup(1,0)
         self:SetDestination(pos, ang)
         self:SendMessage("demat", function() net.WriteVector(self:GetData("demat-pos",Vector())) end)
         self:SetData("demat",true)
@@ -209,6 +212,7 @@ if SERVER then
 
             self:SendMessage("premat",function() net.WriteVector(self:GetData("demat-pos",Vector())) end)
             self:SetData("teleport",true)
+            self:CallHook("PreMatStart")
 
             local timerdelay = (self:GetData("demat-fast",false) and 1.9 or 8.5)
             self:Timer("matdelay", timerdelay, function()
@@ -262,7 +266,6 @@ if SERVER then
     end
 
     function ENT:StopMat()
-        self:SetBodygroup(1,1)
         self:SetData("mat",false)
         self:SetData("step",1)
         self:SetData("teleport",false)
@@ -307,7 +310,10 @@ if SERVER then
             and not self:GetData("redecorate")
             and not self:GetData("redecorate_parent")
         then
-            self:ChangePosition(self:GetRandomLocation(false), self:GetAngles(), false)
+            local randomLocation = self:GetRandomLocation(false)
+            if randomLocation then
+                self:ChangePosition(randomLocation, self:GetAngles(), false)
+            end
         end
     end)
 
@@ -361,14 +367,15 @@ else
                 sound.Play(sound_demat_ext,self:GetPos())
                 if pos and self:GetData("demat-fast",false) then
                     if not IsValid(self) then return end
-                    if (self:GetData("demat-fast",false))==true then
-                        sound.Play(ext.mat_damaged, pos)
+                    if self:GetData("health-warning", false) and (self:GetData("demat-fast",false))==true then
+                        sound.Play(ext.mat_damaged_fast, pos)
                     else
-                        sound.Play(ext.mat, pos)
+                        sound.Play(ext.mat_fast, pos)
                     end
                 end
             end
         end
+        self:CallHook("DematStart")
     end)
 
     ENT:OnMessage("premat", function(self)
@@ -404,12 +411,14 @@ else
                 end
             end
         end
+        self:CallHook("PreMatStart")
     end)
 
     ENT:OnMessage("mat", function(self)
         self:SetData("mat",true)
         self:SetData("step",1)
         self:SetData("vortex",false)
+        self:CallHook("MatStart")
     end)
 
     function ENT:StopDemat()
@@ -424,6 +433,7 @@ else
         self:SetData("mat",false)
         self:SetData("step",1)
         self:SetData("teleport",false)
+        self:CallHook("StopMat")
     end
 
 end
@@ -491,7 +501,11 @@ ENT:AddHook("Think","teleport",function(self,delta)
         target=self:GetTargetAlpha()
         self:SetData("alphatarget",target)
     end
-    local sequencespeed = (self:GetData("demat-fast",false) and self.metadata.Exterior.Teleport.SequenceSpeedFast or self.metadata.Exterior.Teleport.SequenceSpeed)
+    local teleport_md = self.metadata.Exterior.Teleport
+    local sequencespeed = (self:GetData("demat-fast") and teleport_md.SequenceSpeedFast or teleport_md.SequenceSpeed)
+    if self:GetData("health-warning",false) then 
+        sequencespeed = (self:GetData("demat-fast") and teleport_md.SequenceSpeedWarnFast or teleport_md.SequenceSpeedWarning)
+    end
     alpha=math.Approach(alpha,target,delta*66*sequencespeed)
     self:SetData("alpha",alpha)
     local attached=self:GetData("demat-attached")

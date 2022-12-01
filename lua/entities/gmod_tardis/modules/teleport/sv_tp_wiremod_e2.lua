@@ -1,9 +1,9 @@
 -- Wiremod-related teleport functions
 
-ENT:AddWireInput("Demat", "Dematerialise the TARDIS")
-ENT:AddWireInput("Mat", "Materialise the TARDIS")
-ENT:AddWireInput("Pos", "X,Y,Z: Teleport position", "VECTOR")
-ENT:AddWireInput("Ang", "X,Y,Z: Teleport angle", "ANGLE")
+ENT:AddWireInput("Demat", "Wiremod.Inputs.Demat")
+ENT:AddWireInput("Mat", "Wiremod.Inputs.Mat")
+ENT:AddWireInput("Pos", "Wiremod.Inputs.Pos", "VECTOR")
+ENT:AddWireInput("Ang", "Wiremod.Inputs.Ang", "ANGLE")
 
 ENT:AddHook("OnWireInput","teleport",function (self, name, value)
     if name == "Demat" and value >= 1 then
@@ -59,7 +59,7 @@ ENT:AddHook("HandleE2", "teleport_gets", function(self, name, e2)
     elseif name == "GetLongflight" then
         return self:GetData("demat-fast",false) and 0 or 1
     elseif name == "LastAng" then
-        return self:GetData("fastreturn-ang", {0,0,0})
+        return self:GetData("fastreturn-ang", Angle(0,0,0))
     elseif name == "LastPos" then
         return self:GetData("fastreturn-pos", Vector(0,0,0))
     end

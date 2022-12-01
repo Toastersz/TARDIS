@@ -28,14 +28,10 @@ function TARDIS.DrawOverride(self,override)
             if self.PreDraw then self:PreDraw() end
             if self.UseTransparencyFix and (not override) then
                 render.SetBlend(0)
-                if self.o.Draw ~= TARDIS.DrawOverride then
-                    self.o.Draw(self)
-                end
+                self.o.Draw(self)
                 render.SetBlend(1)
             else
-                if self.o.Draw ~= TARDIS.DrawOverride then
-                    self.o.Draw(self)
-                end
+                self.o.Draw(self)
             end
             if self.PostDraw then self:PostDraw() end
             self.parent:CallHook("DrawPart",self)
@@ -80,14 +76,14 @@ local overrides={
         end
 
         if self.PowerOffUse == false and not self.interior:GetPower() then
-            TARDIS:ErrorMessage(a, "Power is disabled. This control is blocked.")
+            TARDIS:ErrorMessage(a, "Common.PowerDisabledControl")
         else
             if allowed~=false then
                 if self.HasUseBasic then
                     self.UseBasic(self,a,...)
                 end
                 if SERVER and self.Control and (not self.HasUse) then
-                    TARDIS:Control(self.Control,a)
+                    TARDIS:Control(self.Control,a,self)
                 else
                     res=self.o.Use(self,a,...)
                 end
@@ -145,13 +141,22 @@ end
 local parts={}
 
 function TARDIS:GetPart(ent,id)
-    return ent.parts and ent.parts[id] or NULL
+    return IsValid(ent) and ent.parts and ent.parts[id] or NULL
+end
+
+function TARDIS:GetParts(ent)
+    return IsValid(ent) and ent.parts
 end
 
 local overridequeue={}
 postinit=postinit or false -- local vars cannot stay on autorefresh
 function TARDIS:AddPart(e)
     local source = debug.getinfo(2).short_src
+
+    if string.lower(e.ID) ~= e.ID then
+        error("The part ID \"" .. e.ID .. "\" contains uppercase symbols. All part IDs have to be lowercase.")
+    end
+
     if parts[e.ID] and parts[e.ID].source ~= source then
         error("Duplicate part ID registered: " .. e.ID .. " (exists in both " .. parts[e.ID].source .. " and " .. source .. ")")
     end
