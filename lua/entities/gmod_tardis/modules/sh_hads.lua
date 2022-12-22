@@ -88,6 +88,14 @@ if SERVER then
         end
     end)
 
+    ENT:AddHook("ShouldUpdateArtron", "hads", function(self)
+        if self:GetData("hads-triggered")
+            or self:GetData("hads-need-remat")
+            or self:GetData("hads-auto-remat")
+        then
+            return false
+        end
+    end)
 
     ENT:AddHook("HandleE2", "hads", function(self,name,e2)
         if name == "GetHADS" then
