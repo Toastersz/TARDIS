@@ -1,36 +1,38 @@
 if SERVER then
 
     TARDIS.artron_values = {
-        cost_demat = -540,
-        cost_mat = -360,
-        cost_full = -1200,
+        cost_demat = -540 / 144,
+        cost_mat = -360 / 144,
+        cost_full = -1200 / 144,
         cost_controls = {
-            ["cloak"] = -720,
-            ["physlock"] = -540,
-            ["float"] = -540,
+            ["cloak"] = -720 / 144,
+            ["physlock"] = -540 / 144,
+            ["float"] = -540 / 144,
         },
-        cost_hads = -180,
-        cost_failed_demat = -80,
+        --Engine release random health cost values:
         min_health_replace = 53,
         max_health_replace = 432,
 
+        --Cost of certain controls and stuff:
+        cost_hads = -180 / 144,
+        cost_failed_demat = -80 / 144,
+
         -- every 1 second:
-        spend_vortex_teleport = -32,
-        spend_flight = -45,
-        spend_flight_boost = -45,
-        spend_cloak = -36,
-        spend_cloak_handbrake = -12,
+        spend_vortex_teleport = -32 / 144,
+        spend_flight = -45 / 144,
+        spend_flight_boost = -45 / 144,
+        spend_cloak = -36 / 144,
+        spend_cloak_handbrake = -12 / 144,
 
         -- every 5 seconds:
-        increase_handbrake = 180 * 5,
-        increase_normal = 15 * 5,
-        increase_warning = 10 * 5,
-        increase_poweroff = 24 * 5,
-        increase_float = 8 * 5,
-        increase_float_handbrake = 40 * 5,
+        increase_handbrake = 180 * 5 / 144,
+        increase_normal = 15 * 5 / 144,
+        increase_warning = 10 * 5 / 144,
+        increase_poweroff = 24 * 5 / 144,
+        increase_float = 8 * 5 / 144,
+        increase_float_handbrake = 40 * 5 / 144,
 
-        increase_engine_release = 720,
-
+        increase_engine_release = 720 / 144,
     }
 
     function ENT:SetArtron(value)
@@ -241,44 +243,6 @@ if SERVER then
         self:AddArtron(TARDIS.artron_values.cost_hads)
     end)
 
-
-
-
-    --
-    -- Conditions for artron changing
-    --
-
-    ENT:AddHook("CanIncreaseArtron", "interrupt-cooldown", function(self)
-        if self:GetData("teleport-interrupted") then
-            return false
-        end
-    end)
-
-    ENT:AddHook("ShouldUpdateArtron", "repair", function(self)
-        if self:GetData("repair-primed") or self:GetData("repairing") then
-            return false
-        end
-    end)
-
-    ENT:AddHook("ShouldUpdateArtron", "redecoration", function(self)
-        if self:GetData("redecorate")
-            or self:GetData("redecorate_parent")
-            or self:GetData("redecorate_child")
-            or self:GetData("is_redecorate_child")
-        then
-            return false
-        end
-    end)
-
-    ENT:AddHook("ShouldUpdateArtron", "hads", function(self)
-        if self:GetData("hads-triggered")
-            or self:GetData("hads-need-remat")
-            or self:GetData("hads-auto-remat")
-        then
-            return false
-        end
-    end)
-
     ENT:AddHook("SettingChanged", "maxartron-changed", function(self, id, val)
         if id ~= "artron_energy_max" then return end
 
@@ -286,7 +250,6 @@ if SERVER then
             self:SetArtron(val)
         end
     end)
-
 
     --
     -- Emergency artron behaviour

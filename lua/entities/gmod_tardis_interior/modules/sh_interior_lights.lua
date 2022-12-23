@@ -85,7 +85,7 @@ local function ParseLightTable(lt, interior, default_falloff)
 end
 
 if CLIENT then
-    ENT:AddHook("Initialize", "lights", function(self)
+    function ENT:LoadLights()
         local light = self.metadata.Interior.Light
         local lights = self.metadata.Interior.Lights
 
@@ -102,6 +102,10 @@ if CLIENT then
                 ParseLightTable(self.light_data.extra[k], self, 10)
             end
         end
+    end
+
+    ENT:AddHook("Initialize", "lights", function(self)
+        self:LoadLights()
     end)
 
     function ENT:DrawLight(id,light)
@@ -225,7 +229,7 @@ if CLIENT then
         end
     end
 
-    ENT:AddHook("Initialize", "lamps", function(self)
+    function ENT:LoadLamps()
         local lamps = self.metadata.Interior.Lamps
         if not lamps then return end
 
@@ -237,7 +241,10 @@ if CLIENT then
             self:InitLampData(this_lamp)
             self.lamps_data[k] = this_lamp
         end
+    end
 
+    ENT:AddHook("Initialize", "lamps", function(self)
+        self:LoadLamps()
         self:CreateLamps()
         self:RunLampUpdate()
     end)
@@ -377,7 +384,7 @@ end
 -- Light states
 
 local function ChangeSingleLightState(light_table, state)
-    local new_state = light_table.states && light_table.states[state]
+    local new_state = light_table.states and light_table.states[state]
     if not new_state then return end
     table.Merge(light_table, new_state)
 end
@@ -531,5 +538,17 @@ if CLIENT then
                 end
             end
         end
+    end)
+end
+
+if CLIENT then
+    ENT:AddHook("SlowThink", "lights", function(self)
+        local pos = self:GetPos()
+        if self.lights_lastpos == pos then return end
+        print(pos)
+        self.lights_lastpos = pos
+        self:LoadLights()
+        self:LoadLamps()
+        self:CreateLamps()
     end)
 end
