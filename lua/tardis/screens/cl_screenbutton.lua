@@ -51,6 +51,8 @@ function TardisScreenButton:new(parent,screen)
     end
 
     sb.ThinkInternal = function()
+        if not IsValid(parent) then return end
+
         sb.transparency = math.Clamp(sb.transparency, 0, 255)
 
         if not sb.is_toggle and sb.on and CurTime() > sb.click_end_time then
@@ -58,6 +60,7 @@ function TardisScreenButton:new(parent,screen)
             sb.frame:SetImage(sb.frame_off)
             sb.on = false
         end
+
         if sb.moving.now then
             sb.moving.move()
             sb.icon:SetColor(Color(255, 255, 255, sb.transparency))
@@ -66,16 +69,21 @@ function TardisScreenButton:new(parent,screen)
             sb.clickable = (sb.transparency ~= 0)
         end
 
-        local realpos = { math.Clamp(sb.pos[1], 0, sb.parent:GetWide() - sb.size[1]),
-                          math.Clamp(sb.pos[2], 0, sb.parent:GetTall() - sb.size[2]) }
+        if sb.lastpos == nil or sb.lastpos[1] ~= sb.pos[1] or sb.lastpos[2] ~= sb.pos[2] then
 
-        sb.icon:SetPos(realpos[1], realpos[2])
-        sb.frame:SetPos(realpos[1], realpos[2])
-        sb.label:SetPos(sb.pos[1], sb.pos[2])
+            local realpos = { math.Clamp(sb.pos[1], 0, sb.parent:GetWide() - sb.size[1]),
+                            math.Clamp(sb.pos[2], 0, sb.parent:GetTall() - sb.size[2]) }
 
-        sb.icon:SetSize(sb.size[1], sb.size[2])
-        sb.frame:SetSize(sb.size[1], sb.size[2])
-        sb.label:SetSize(sb.size[1], sb.size[2])
+            sb.icon:SetPos(realpos[1], realpos[2])
+            sb.frame:SetPos(realpos[1], realpos[2])
+            sb.label:SetPos(sb.pos[1], sb.pos[2])
+
+            sb.icon:SetSize(sb.size[1], sb.size[2])
+            sb.frame:SetSize(sb.size[1], sb.size[2])
+            sb.label:SetSize(sb.size[1], sb.size[2])
+
+            sb.lastpos = {sb.pos[1], sb.pos[2]}
+        end
 
         if not sb.moving.now then
             sb.outside = (sb.pos[1] < 0) or (sb.pos[2] < 0)
@@ -247,13 +255,15 @@ function TardisScreenButton:SetIsToggle(is_toggle)
 end
 
 function TardisScreenButton:SetPressed(on)
-    self.on = on
-    if on then
-        self.icon:SetImage(self.icon_on)
-        self.frame:SetImage(self.frame_on)
-    else
-        self.icon:SetImage(self.icon_off)
-        self.frame:SetImage(self.frame_off)
+    if self.on ~= on then
+        self.on = on
+        if on then
+            self.icon:SetImage(self.icon_on)
+            self.frame:SetImage(self.frame_on)
+        else
+            self.icon:SetImage(self.icon_off)
+            self.frame:SetImage(self.frame_off)
+        end
     end
 end
 function TardisScreenButton:IsPressed()
@@ -285,16 +295,16 @@ function TardisScreenButton:SetControl(control)
     end
 end
 
-function TardisScreenButton:SetPressedStateData(parent, data)
+function TardisScreenButton:SetPressedStateData(ent, data)
     if istable(data) then
         self.Think = function()
-            if not parent._init then return end
-            self:SetPressed(parent:GetData(data[1]) or parent:GetData(data[2]))
+            if not ent._init then return end
+            self:SetPressed(ent:GetData(data[1]) or ent:GetData(data[2]))
         end
     else
         self.Think = function()
-            if not parent._init then return end
-            self:SetPressed(parent:GetData(data))
+            if not ent._init then return end
+            self:SetPressed(ent:GetData(data))
         end
     end
 end
