@@ -92,10 +92,16 @@ end
 local function matproxy_tardis_power_bind(self, mat, ent)
     if not IsValid(ent) or not IsValid(ent.exterior) or not ent.TardisPart then return end
 
-    local var = ent.exterior:GetPower() and self.on_var or self.off_var
-    if not var then return end
+    local on = ent.exterior:GetPower()
 
-    mat:SetVector(self.ResultTo, mat:GetVector(var))
+    if self.last_on ~= on then
+        self.last_on = on
+
+        local var = on and self.on_var or self.off_var
+        if not var then return end
+
+        mat:SetVector(self.ResultTo, mat:GetVector(var))
+    end
 end
 
 matproxy.Add({

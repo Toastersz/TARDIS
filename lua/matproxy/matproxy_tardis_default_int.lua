@@ -9,13 +9,19 @@ matproxy.Add({
         if not IsValid(ent) or not ent.TardisPart then return end
 
         local col = ent:GetData("default_int_env_color") or Color(0,200,255)
-        col = Color(col.r, col.g, col.b):ToVector()
+        local power = ent.exterior and ent.exterior:GetPower()
 
-        if ent.exterior and not ent.exterior:GetPower() then
-            col = col * 0.1
+        if self.lastcol ~= col or self.lastpower ~= power then
+            self.lastcol = col
+            self.lastpower = power
+
+            col = Color(col.r, col.g, col.b):ToVector()
+            if not power then
+                col = col * 0.1
+            end
+
+            mat:SetVector(self.ResultTo, col);
         end
-
-        mat:SetVector( self.ResultTo, col);
     end
 })
 
@@ -31,9 +37,12 @@ matproxy.Add({
 
         local col = ent:GetData("default_int_floor_lights_color") or Color(230,230,210)
 
-        col = Color(col.r, col.g, col.b):ToVector()
+        if self.lastcol ~= col then
+            self.lastcol = col
 
-        mat:SetVector( self.ResultTo, col);
+            col = Color(col.r, col.g, col.b):ToVector()
+            mat:SetVector(self.ResultTo, col);
+        end
     end
 })
 
@@ -49,8 +58,12 @@ matproxy.Add({
 
         local col = ent:GetData("default_int_rotor_color") or Color(255,255,255)
 
-        col = Color(col.r, col.g, col.b):ToVector()
-        mat:SetVector( self.ResultTo, col);
+        if self.lastcol ~= col then
+            self.lastcol = col
+
+            col = Color(col.r, col.g, col.b):ToVector()
+            mat:SetVector(self.ResultTo, col)
+        end
     end
 })
 
@@ -78,7 +91,9 @@ matproxy.Add({
             return
         end
 
-        mat:SetFloat(self.ResultTo, 0)
+        if mat:GetFloat(self.ResultTo) ~= 0 then
+            mat:SetFloat(self.ResultTo, 0)
+        end
     end
 })
 
@@ -93,10 +108,15 @@ matproxy.Add({
     bind = function(self, mat, ent)
         if not IsValid(ent) or not IsValid(ent.exterior) or not ent.TardisPart then return end
 
-        local var = ent:GetData("default_sonic_charger_active") and self.on_var or self.off_var
-        if not var then return end
+        local active = ent:GetData("default_sonic_charger_active")
 
-        mat:SetVector(self.ResultTo, mat:GetVector(var))
+        if active ~= self.last_active then
+            self.last_active = active
+            local var = active and self.on_var or self.off_var
+            if not var then return end
+
+            mat:SetVector(self.ResultTo, mat:GetVector(var))
+        end
     end,
 })
 
@@ -116,10 +136,13 @@ matproxy.Add({
         self.off_var3 = values.offvar3
     end,
     bind = function(self, mat, ent)
-        if not IsValid(ent) or not IsValid(ent.interior) or not ent.TardisPart or ent.ID ~= "default_throttle_lights" then
-            mat:SetVector(self.ResultTo, mat:GetVector(self.on_var))
-            mat:SetVector(self.ResultTo2, mat:GetVector(self.on_var2))
-            mat:SetVector(self.ResultTo3, mat:GetVector(self.on_var3))
+        if not IsValid(ent) or not ent.TardisPart or not IsValid(ent.interior) or ent.ID ~= "default_throttle_lights" then
+            if not self.last_on then
+                self.last_on = true
+                mat:SetVector(self.ResultTo, mat:GetVector(self.on_var))
+                mat:SetVector(self.ResultTo2, mat:GetVector(self.on_var2))
+                mat:SetVector(self.ResultTo3, mat:GetVector(self.on_var3))
+            end
             return
         end
 
@@ -127,14 +150,18 @@ matproxy.Add({
         if not IsValid(throttle) then return end
 
         local on = throttle:GetOn()
-        local var = on and self.on_var or self.off_var
-        local var2 = on and self.on_var2 or self.off_var2
-        local var3 = on and self.on_var3 or self.off_var3
-        if not var or not var2 or not var3 then return end
 
-        mat:SetVector(self.ResultTo, mat:GetVector(var))
-        mat:SetVector(self.ResultTo2, mat:GetVector(var2))
-        mat:SetVector(self.ResultTo3, mat:GetVector(var3))
+        if on ~= self.last_on then
+            self.last_on = on
+            local var = on and self.on_var or self.off_var
+            local var2 = on and self.on_var2 or self.off_var2
+            local var3 = on and self.on_var3 or self.off_var3
+            if not var or not var2 or not var3 then return end
+
+            mat:SetVector(self.ResultTo, mat:GetVector(var))
+            mat:SetVector(self.ResultTo2, mat:GetVector(var2))
+            mat:SetVector(self.ResultTo3, mat:GetVector(var3))
+        end
     end,
 })
 
