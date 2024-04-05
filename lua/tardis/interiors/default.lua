@@ -490,48 +490,12 @@ T.Exterior = {
 }
 
 T.Timings = {
-    DematInterrupt = 3,
-    DematStartingAnimation = 3,
-    MatStoppingAnimation = 3.2,
+    DematAbortState = 3,
+    TakeOffState = 3,
+    ParkingState = 3.2,
 }
 
 T.CustomHooks = {
-    fast_top_bulbs = {
-        exthooks = {
-            ["DematStart"] = true,
-            ["StopMat"] = true,
-        },
-        func = function(ext,int)
-            if SERVER then return end
-            if not IsValid(int) then return end
-
-            local time, data
-
-            if ext:GetData("demat") then
-                time = ext.metadata.Timings.DematStartingAnimation
-                data = "demat_animation"
-            else
-                time = ext.metadata.Timings.MatStoppingAnimation
-                data = "mat_animation"
-            end
-
-            int:SetData(data, true)
-            int:Timer(data, time, function()
-                int:SetData(data, nil)
-            end)
-        end,
-    },
-    fast_top_bulbs_handbrake = {
-        inthooks = {
-            ["HandbrakeToggled"] = true,
-        },
-        func = function(ext,int,on)
-            if CLIENT and on and IsValid(int) and int:GetData("mat_animation") then
-                int:CancelTimer("mat_animation")
-                int:SetData("mat_animation", nil)
-            end
-        end,
-    },
     screen_disable = {
         inthooks = {
             ["ShouldNotDrawScreen"] = true,
@@ -563,7 +527,6 @@ T.CustomHooks = {
             end
         end,
     },
-
 }
 
 

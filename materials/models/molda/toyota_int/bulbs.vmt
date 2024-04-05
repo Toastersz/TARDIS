@@ -34,51 +34,37 @@
 			offVar "$color2_off"
 			resultVar "$color2"
 		}
-		TARDIS_State {
+		TARDIS_State_Texture {
 			resultTextureVar $basetexture
 			resultFrameVar $frame
 
 			textures {
-				idle "models/molda/toyota_int/bulbs"
-				handbrake "models/molda/toyota_int/bulbs"
-				interrupt "models/molda/toyota_int/bulbs_half"
-				demat_fail "models/molda/toyota_int/bulbs_warning"
-				mat_fail "models/molda/toyota_int/bulbs_travel_warning"
+				dead "off"
+
 				off "models/molda/toyota_int/bulbs_off"
-				travel "models/molda/toyota_int/bulbs_travel"
-				demat "models/molda/toyota_int/bulbs_travel"
-				mat "models/molda/toyota_int/bulbs_travel"
+				idle "models/molda/toyota_int/bulbs"
+				handbrake "idle"
 
-				idle_warning "models/molda/toyota_int/bulbs_warning"
+				travel { "models/molda/toyota_int/bulbs_travel" 10 }
+				takeoff { "models/molda/toyota_int/bulbs_travel" 55 }
+				parking { "models/molda/toyota_int/bulbs_travel" 50 }
+
+				demat_abort "models/molda/toyota_int/bulbs_half"
+				demat_fail { "models/molda/toyota_int/bulbs_warning" 30 }
+				mat_fail { "models/molda/toyota_int/bulbs_travel_warning" 30 }
+
+
+				off_warning "off"
+				idle_warning { "models/molda/toyota_int/bulbs_warning" 10 }
 				handbrake_warning "models/molda/toyota_int/bulbs_warning_static"
-				interrupt_warning "models/molda/toyota_int/bulbs_warning"
-				demat_fail_warning "models/molda/toyota_int/bulbs_warning"
-				mat_fail_warning "models/molda/toyota_int/bulbs_travel_warning"
-				off_warning "models/molda/toyota_int/bulbs_off"
-				travel_warning "models/molda/toyota_int/bulbs_travel_warning"
-				demat_warning "models/molda/toyota_int/bulbs_travel_warning"
-				mat_warning "models/molda/toyota_int/bulbs_travel_warning"
-			}
-			frameRates {
-				idle 0
-				handbrake 0
-				interrupt 0
-				demat_fail 30
-				mat_fail 30
-				off 0
-				travel 10
-				demat 55
-				mat 50
 
-				idle_warning 10
-				handbrake_warning 0
-				interrupt_warning 10
-				demat_fail_warning 40
-				mat_fail_warning 40
-				off_warning 0
-				travel_warning 10
-				demat_warning 40
-				mat_warning 40
+				travel_warning { "models/molda/toyota_int/bulbs_travel_warning" 10 }
+				takeoff_warning { "models/molda/toyota_int/bulbs_travel_warning" 40 }
+				parking_warning "takeoff_warning"
+
+				demat_abort_warning "idle_warning"
+				demat_fail_warning { "models/molda/toyota_int/bulbs_warning" 40 }
+				mat_fail_warning "takeoff_warning"
 			}
 		}
 		Sine {
