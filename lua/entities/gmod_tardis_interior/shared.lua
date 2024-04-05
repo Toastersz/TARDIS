@@ -105,4 +105,21 @@ function ENT:LoadFolder(folder,addonly,noprefix)
 end
 
 ENT:LoadFolder("modules/libraries")
+
+if SERVER then
+    function ENT:CallClientHook(name, ...)
+        self:SendMessage("client_hook", {name, ...})
+    end
+    function ENT:CallClientCommonHook(name, ...)
+        self:SendMessage("client_common_hook", {name, ...})
+    end
+else
+    ENT:OnMessage("client_hook", function(self, data, ply)
+        self:CallHook(unpack(data))
+    end)
+    ENT:OnMessage("client_common_hook", function(self, data, ply)
+        self:CallCommonHook(unpack(data))
+    end)
+end
+
 ENT:LoadFolder("modules")
