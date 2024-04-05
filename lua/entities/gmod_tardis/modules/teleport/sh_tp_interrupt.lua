@@ -131,32 +131,32 @@ else
 end
 
 ENT:AddHook("Think", "tp_interrupt", function(self)
-    if self:GetData("teleport-interrupted", false) then
-        local timediff = CurTime() - self:GetData("teleport-interrupt-time")
+    if not self:GetData("teleport-interrupted", false) then return end
 
-        if timediff > 6 and timediff < 6.2 and self:GetData("teleport-interrupt-effects", false) then
-            self:SetData("teleport-interrupt-effects", false, true)
+    local timediff = CurTime() - self:GetData("teleport-interrupt-time")
+
+    if timediff > 6 and timediff < 6.2 and self:GetData("teleport-interrupt-effects", false) then
+        self:SetData("teleport-interrupt-effects", false, true)
+    end
+
+    local showeffects = (CLIENT and self:GetData("teleport-interrupt-effects", false)
+            and LocalPlayer():GetTardisData("exterior") == self
+            and (not LocalPlayer():GetTardisData("thirdperson"))
+            and TARDIS:GetSetting("breakdown-effects"))
+
+    if showeffects then
+        if math.Round(10 * CurTime()) % 2 == 0 then
+            self:InteriorSparks(1)
         end
-
-        local showeffects = (CLIENT and self:GetData("teleport-interrupt-effects", false)
-                and LocalPlayer():GetTardisData("exterior") == self
-                and (not LocalPlayer():GetTardisData("thirdperson"))
-                and TARDIS:GetSetting("breakdown-effects"))
-
-        if showeffects then
-            if math.Round(10 * CurTime()) % 2 == 0 then
-                self:InteriorSparks(1)
-            end
-            if timediff < 0.1 or (timediff > 2 and timediff < 2.1)
-                or (timediff > 2.6 and timediff < 2.7)
-            then
-                self:InteriorExplosion()
-            end
+        if timediff < 0.1 or (timediff > 2 and timediff < 2.1)
+            or (timediff > 2.6 and timediff < 2.7)
+        then
+            self:InteriorExplosion()
         end
+    end
 
-        if timediff > 10 then
-            self:SetData("teleport-interrupted", false, true)
-        end
+    if timediff > 10 then
+        self:SetData("teleport-interrupted", false, true)
     end
 end)
 
