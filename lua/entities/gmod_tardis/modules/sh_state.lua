@@ -65,6 +65,9 @@ end
 --
 
 function ENT:SetState(state)
+	if not TARDIS.States[state] then
+		error("Attempted to apply unsupported state " .. state)
+	end
 	return self:SetData("state", state, true)
 end
 
