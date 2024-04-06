@@ -611,7 +611,7 @@ T.Templates = {
     default_lamps = {
         override = true,
         condition = function(id, ply, ent)
-            return (TARDIS:GetCustomSetting(id, "lamps", ply) ~= false)
+            return TARDIS:GetCustomSetting(id, "lamps", ply)
         end,
     },
     default_dynamic_color = {
@@ -646,6 +646,14 @@ T.Templates = {
         override = true,
         condition = function(id, ply, ent)
             return not TARDIS:GetCustomSetting(id, "screens_off", ply)
+        end,
+    },
+    default_small_version_lamp_fix= {
+        override = true,
+        condition = function(id, ply, ent)
+            local lamps = TARDIS:GetCustomSetting(id, "lamps", ply)
+            local small = TARDIS:GetCustomSetting(id, "small_version", ply)
+            return (lamps and small)
         end,
     },
 }

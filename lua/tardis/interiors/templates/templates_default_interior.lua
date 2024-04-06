@@ -194,7 +194,15 @@ TARDIS:AddInteriorTemplate("default_color_update", {
 
 TARDIS:AddInteriorTemplate("default_small_version", {
     Interior = {
-        ExitDistance = 600,
+        Size = {
+            Min = Vector(-555.742, -461.072, 0),
+            Max = Vector(388.574, 371.054, 381.653),
+        },
+        ExitBox = {
+            Min = Vector(-659.914, -564.271, -50),
+            Max = Vector(484.983, 514.944, 385.095),
+        },
+
         Parts = {
             default_rotor = {
                 model = "models/molda/toyota_int/rotor_small.mdl",
@@ -205,6 +213,14 @@ TARDIS:AddInteriorTemplate("default_small_version", {
             default_corridors = {
                 model = "models/molda/toyota_int/corridor_version3.mdl"
             },
+        },
+    },
+})
+
+TARDIS:AddInteriorTemplate("default_small_version_lamp_fix", {
+    Interior = {
+        Size = {
+            Max = Vector(484.983, 514.944, 800)
         },
     },
 })
