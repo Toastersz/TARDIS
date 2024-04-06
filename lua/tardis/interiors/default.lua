@@ -23,7 +23,7 @@ T.Interior = {
         Min = Vector(-585.336, -1378.008, -33.179),
         Max = Vector(892.477, 457.64, 381.653)
     },
-    
+
     ExitBox = {
         Min = Vector(-659.914, -1364.271, -104.82),
         Max = Vector(984.983, 514.944, 385.095)
@@ -586,13 +586,8 @@ T.CustomSettings = {
     },
     lamps = {
         text = "Interiors.Default.CustomSettings.Lamps",
-        value_type = "list",
-        value = false,
-        options = {
-            [false] = "Interiors.Default.CustomSettings.Lamps.Off",
-            ["few"] = "Interiors.Default.CustomSettings.Lamps.Few",
-            ["many"] = "Interiors.Default.CustomSettings.Lamps.Many",
-        },
+        value_type = "bool",
+        value = true,
     },
     small_version = {
         text = "Interiors.Default.CustomSettings.SmallVersion",
@@ -617,12 +612,6 @@ T.Templates = {
         override = true,
         condition = function(id, ply, ent)
             return (TARDIS:GetCustomSetting(id, "lamps", ply) ~= false)
-        end,
-    },
-    default_more_lamps = {
-        override = true,
-        condition = function(id, ply, ent)
-            return (TARDIS:GetCustomSetting(id, "lamps", ply) == "many")
         end,
     },
     default_dynamic_color = {
