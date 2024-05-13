@@ -217,6 +217,12 @@ function TARDIS:CreateInteriorMetadata(id, ent)
     metadata.Interior.TextureSets = TARDIS:GetMergedTextureSets(metadata.Interior.TextureSets)
     metadata.Exterior.TextureSets = TARDIS:GetMergedTextureSets(metadata.Exterior.TextureSets)
 
+    local lightOverridebaseBrightnessRGB = metadata.Interior.LightOverride.basebrightnessRGB
+    if lightOverridebaseBrightnessRGB and type(lightOverridebaseBrightnessRGB) == "table" then
+        metadata.Interior.LightOverride.basebrightnessRGB = Vector(lightOverridebaseBrightnessRGB[1], lightOverridebaseBrightnessRGB[2], lightOverridebaseBrightnessRGB[3])
+        print("[TARDIS] WARNING: Interior '"..id.."' metadata: Exterior.LightOverride.basebrightnessRGB should be a Vector not a table\n")
+    end
+
     return metadata
 end
 
