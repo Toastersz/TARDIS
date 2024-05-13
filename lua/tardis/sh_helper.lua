@@ -76,6 +76,8 @@ function TARDIS:CheckPP(ply, ent)
     return hook.Call("CanTool", GAMEMODE, ply, pp_trace, "")
 end
 
+TARDIS.color_white_vector = Vector(1,1,1)
+
 --[[
 local meta=FindMetaTable("Player")
 meta.OldSetEyeAngles=meta.OldSetEyeAngles or meta.SetEyeAngles

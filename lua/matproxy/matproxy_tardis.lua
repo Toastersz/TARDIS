@@ -119,3 +119,18 @@ matproxy.Add({
     init = matproxy_tardis_power_init,
     bind = matproxy_tardis_power_bind,
 })
+
+matproxy.Add({
+    name = "TARDIS_InteriorBaseLight",
+
+    init = function( self, mat, values )
+        self.ResultTo = values.resultvar
+    end,
+    
+    bind = function( self, mat, ent )
+        if not IsValid(ent) or not ent.TardisPart then return end
+
+        local col = ent:GetData("interior_base_light_color", TARDIS.color_white_vector)
+        mat:SetVector(self.ResultTo, col)
+    end
+})
