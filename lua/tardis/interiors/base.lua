@@ -87,7 +87,8 @@ T.Exterior = {
         --horizfov = 90, --vertical and horizontal field of view of the light. Will default to portal height and width.
         farz = 750, --FarZ property of the light. Determines how far the light projects.]]
         offset = Vector(-21,0,51.1), --Offset from box origin
-        texture = "effects/flashlight/square" --Texture the projected light will use. You can get these from the Lamp tool.
+        texture = "effects/flashlight/square", --Texture the projected light will use. You can get these from the Lamp tool.
+        baselightmix = 0, --How much the base light affects the projected light. 0 = none, 1 = full.
     },
     Sounds = {
         Teleport = {

@@ -28,6 +28,17 @@ function ENT:PickProjectedLightColor()
 
     pickedcolor = pickedcolor or pl.color or int_color_data.color
 
+    if pl.baselightmix > 0 and IsValid(self.interior) then
+        local int_base_light_color = self.interior:GetBaseLightColor()
+
+        local mix = pl.baselightmix
+        pickedcolor = Color(
+            pickedcolor.r * (1 - mix) + int_base_light_color.r * mix,
+            pickedcolor.g * (1 - mix) + int_base_light_color.g * mix,
+            pickedcolor.b * (1 - mix) + int_base_light_color.b * mix
+        )
+    end
+
     return pickedcolor
 end
 

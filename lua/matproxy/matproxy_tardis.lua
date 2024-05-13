@@ -130,7 +130,7 @@ matproxy.Add({
     bind = function( self, mat, ent )
         if not IsValid(ent) or not ent.TardisPart then return end
 
-        local col = ent:GetData("interior_base_light_color", TARDIS.color_white_vector)
+        local col = ent:GetData("interior_base_light_color_vec", TARDIS.color_white_vector)
         mat:SetVector(self.ResultTo, col)
     end
 })

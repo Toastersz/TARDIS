@@ -9,7 +9,7 @@ local function predraw_o(self, part)
 
     render.SuppressEngineLighting(true)
 
-    local col = self:GetData("interior_base_light_color", TARDIS.color_white_vector)
+    local colvec = self:GetBaseLightColorVector()
 
     local parts_table = power and lo.parts or lo.parts_nopower
 
@@ -21,7 +21,7 @@ local function predraw_o(self, part)
             render.ResetModelLighting(part_br, part_br, part_br)
         end
     else
-        render.ResetModelLighting(col[1], col[2], col[3])
+        render.ResetModelLighting(colvec[1], colvec[2], colvec[3])
     end
 
     --render.SetLightingMode(1)

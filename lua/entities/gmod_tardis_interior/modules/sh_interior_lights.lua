@@ -628,13 +628,26 @@ end
 
 -- Base light
 
-if SERVER then
-    function ENT:SetCustomBaseLightEnabled(enabled, color, brightness)
-        self:SetData("interior_custom_base_light_enabled", enabled or false, true)
-    end
+function ENT:GetCustomBaseLightEnabled()
+    return self:GetData("interior_custom_base_light_enabled", false)
+end
 
-    function ENT:GetCustomBaseLightEnabled()
-        return self:GetData("interior_custom_base_light_enabled", false)
+function ENT:GetCustomBaseLightColor()
+    return self:GetData("interior_custom_base_light_color")
+end
+
+function ENT:GetGetBaseLightColorVector()
+    return self:GetData("interior_base_light_color_vec")
+end
+
+function ENT:GetCustomBaseLightBrightness()
+    return self:GetData("interior_custom_base_light_brightness")
+end
+
+
+if SERVER then
+    function ENT:SetCustomBaseLightEnabled(enabled)
+        self:SetData("interior_custom_base_light_enabled", enabled or false, true)
     end
 
     function ENT:ToggleCustomBaseLightEnabled()
@@ -645,18 +658,18 @@ if SERVER then
         self:SetData("interior_custom_base_light_color", color, true)
     end
 
-    function ENT:GetCustomBaseLightColor()
-        return self:GetData("interior_custom_base_light_color")
-    end
-
     function ENT:SetCustomBaseLightBrightness(brightness)
         self:SetData("interior_custom_base_light_brightness", brightness, true)
     end
-
-    function ENT:GetCustomBaseLightBrightness()
-        return self:GetData("interior_custom_base_light_brightness")
-    end
 else
+    function ENT:GetBaseLightColorVector()
+        return self:GetData("interior_base_light_color_vec", TARDIS.color_white_vector)
+    end
+
+    function ENT:GetBaseLightColor()
+        return self:GetBaseLightColorVector():ToColor()
+    end
+    
     ENT:AddHook("Think", "baselight", function(self)
         local lo = self.metadata.Interior.LightOverride
         if not lo then return end
@@ -669,7 +682,7 @@ else
         local customcol = self:GetData("interior_custom_base_light_color")
         local custombr = self:GetData("interior_custom_base_light_brightness", normalbr)
 
-        local currentcolvec = self:GetData("interior_base_light_color")
+        local currentcolvec = self:GetData("interior_base_light_color_vec")
         local targetcolvec
         if self:GetData("interior_custom_base_light_enabled") and customcol then
             targetcolvec = customcol:ToVector() * (custombr or normalbr)
@@ -680,7 +693,7 @@ else
         if currentcolvec == targetcolvec then
             return
         elseif not currentcolvec then
-            self:SetData("interior_base_light_color", targetcolvec)
+            self:SetData("interior_base_light_color_vec", targetcolvec)
             return
         end
 
@@ -698,7 +711,7 @@ else
         
         local colvec = LerpVector(fraction, prevcolvec, targetcolvec)
         
-        self:SetData("interior_base_light_color", colvec)
+        self:SetData("interior_base_light_color_vec", colvec)
         self:SetData("interior_base_light_transition_fraction", fraction)
     end)
 end
