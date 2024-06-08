@@ -100,10 +100,6 @@ function ENT:GetFlight()
     return self:GetData("flight",false)
 end
 
-function ENT:IsTravelling()
-    return self:CallHook("IsTravelling")
-end
-
 ENT:AddHook("IsTravelling", "flight", function(self)
     if self:GetFlight() then
         return true

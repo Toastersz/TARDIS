@@ -10,6 +10,8 @@ if SERVER then
         local time = self.metadata.Timings.DematFail
         self:Timer("failed-demat-stop", time, function()
             self:SetData("failing-demat", false, true)
+            self:CallCommonHook("DematFailStopped")
+            self:CallClientCommonHook("DematFailStopped")
         end)
     end
 
@@ -42,10 +44,13 @@ if SERVER then
         end
 
         self:SetData("failing-mat", true, true)
+        self:CallCommonHook("MatFailed")
         self:SendMessage("failed-mat")
         local time = self.metadata.Timings.MatFail
         self:Timer("failed-mat-stop", time, function()
             self:SetData("failing-mat", false, true)
+            self:CallCommonHook("MatFailStopped")
+            self:CallClientCommonHook("MatFailStopped")
         end)
         if callback then callback(false) end
     end
@@ -156,6 +161,7 @@ else -- CLIENT
     end)
 
     ENT:OnMessage("failed-mat", function(self, data, ply)
+        self:CallCommonHook("MatFailed")
         if TARDIS:GetSetting("teleport-sound") and TARDIS:GetSetting("sound") then
             local ext = self.metadata.Exterior.Sounds.Teleport
             local int = self.metadata.Interior.Sounds.Teleport

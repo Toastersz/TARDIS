@@ -178,9 +178,11 @@ T.Exterior = {
     }
 }
 T.Timings = {
-    DematInterrupt = 1,
+    DematAbortState = 1,
     DematFail = 4,
     MatFail = 8,
+    TakeOffState = 0,
+    ParkingState = 0,
 }
 
 TARDIS:AddInterior(T)

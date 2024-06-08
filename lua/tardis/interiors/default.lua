@@ -23,7 +23,7 @@ T.Interior = {
         Min = Vector(-585.336, -1378.008, -33.179),
         Max = Vector(892.477, 457.64, 381.653)
     },
-    
+
     ExitBox = {
         Min = Vector(-659.914, -1364.271, -104.82),
         Max = Vector(984.983, 514.944, 385.095)
@@ -490,48 +490,12 @@ T.Exterior = {
 }
 
 T.Timings = {
-    DematInterrupt = 3,
-    DematStartingAnimation = 3,
-    MatStoppingAnimation = 3.2,
+    DematAbortState = 3,
+    TakeOffState = 3,
+    ParkingState = 3.2,
 }
 
 T.CustomHooks = {
-    fast_top_bulbs = {
-        exthooks = {
-            ["DematStart"] = true,
-            ["StopMat"] = true,
-        },
-        func = function(ext,int)
-            if SERVER then return end
-            if not IsValid(int) then return end
-
-            local time, data
-
-            if ext:GetData("demat") then
-                time = ext.metadata.Timings.DematStartingAnimation
-                data = "demat_animation"
-            else
-                time = ext.metadata.Timings.MatStoppingAnimation
-                data = "mat_animation"
-            end
-
-            int:SetData(data, true)
-            int:Timer(data, time, function()
-                int:SetData(data, nil)
-            end)
-        end,
-    },
-    fast_top_bulbs_handbrake = {
-        inthooks = {
-            ["HandbrakeToggled"] = true,
-        },
-        func = function(ext,int,on)
-            if CLIENT and on and IsValid(int) and int:GetData("mat_animation") then
-                int:CancelTimer("mat_animation")
-                int:SetData("mat_animation", nil)
-            end
-        end,
-    },
     screen_disable = {
         inthooks = {
             ["ShouldNotDrawScreen"] = true,
@@ -563,7 +527,6 @@ T.CustomHooks = {
             end
         end,
     },
-
 }
 
 
@@ -623,13 +586,8 @@ T.CustomSettings = {
     },
     lamps = {
         text = "Interiors.Default.CustomSettings.Lamps",
-        value_type = "list",
-        value = false,
-        options = {
-            [false] = "Interiors.Default.CustomSettings.Lamps.Off",
-            ["few"] = "Interiors.Default.CustomSettings.Lamps.Few",
-            ["many"] = "Interiors.Default.CustomSettings.Lamps.Many",
-        },
+        value_type = "bool",
+        value = true,
     },
     small_version = {
         text = "Interiors.Default.CustomSettings.SmallVersion",
@@ -653,13 +611,7 @@ T.Templates = {
     default_lamps = {
         override = true,
         condition = function(id, ply, ent)
-            return (TARDIS:GetCustomSetting(id, "lamps", ply) ~= false)
-        end,
-    },
-    default_more_lamps = {
-        override = true,
-        condition = function(id, ply, ent)
-            return (TARDIS:GetCustomSetting(id, "lamps", ply) == "many")
+            return TARDIS:GetCustomSetting(id, "lamps", ply)
         end,
     },
     default_dynamic_color = {
@@ -694,6 +646,14 @@ T.Templates = {
         override = true,
         condition = function(id, ply, ent)
             return not TARDIS:GetCustomSetting(id, "screens_off", ply)
+        end,
+    },
+    default_small_version_lamp_fix= {
+        override = true,
+        condition = function(id, ply, ent)
+            local lamps = TARDIS:GetCustomSetting(id, "lamps", ply)
+            local small = TARDIS:GetCustomSetting(id, "small_version", ply)
+            return (lamps and small)
         end,
     },
 }

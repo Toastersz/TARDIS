@@ -96,7 +96,13 @@ function TARDIS:SelectSpawnID(id, ent)
         version = id
     end
 
-    return TARDIS:SelectDoorVersionID(version, ent)
+    version = TARDIS:SelectDoorVersionID(version, ent)
+
+    if not self.Metadata[version] then
+        version = TARDIS:SelectDoorVersionID(versions.main, ent)
+    end
+    
+    return version
 end
 
 function TARDIS:GetMainVersionId(int_id)

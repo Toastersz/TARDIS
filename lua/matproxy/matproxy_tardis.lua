@@ -1,12 +1,26 @@
 matproxy.Add({
-    name = "TARDIS_State",
+    name = "TARDIS_State_Texture",
 
     init = function(self, mat, values)
         self.Texture = values.resulttexturevar
         self.FrameNo = values.resultframevar
 
-        self.Textures = table.Copy(values.textures)
-        self.FrameRates = table.Copy(values.framerates)
+        self.Textures = {}
+        self.FrameRates = {}
+
+        for k,v in pairs(values.textures) do
+            if values.textures[v] then
+                v = values.textures[v]
+            end
+            if istable(v) then
+                local texture = table.GetKeys(v)[1]
+                self.Textures[k] = texture
+                self.FrameRates[k] = v[texture]
+            else
+                self.Textures[k] = v
+                self.FrameRates[k] = 0
+            end
+        end
 
         self.AnimateTextures = {}
         self.FrameDurations = {}
@@ -20,8 +34,8 @@ matproxy.Add({
             end
         end
 
-        self.next_frame_update = RealTime()
-        self.last_frame_update = RealTime()
+        self.next_update = RealTime()
+        self.last_update = RealTime()
         self.current_frame = 0
     end,
 
@@ -30,59 +44,41 @@ matproxy.Add({
         local ext = ent.exterior
         if not IsValid(ext) then return end
 
-        local function get_base_mat_name()
-            if not ext:GetPower() then
-                return "off"
-            elseif ext:GetData("demat_animation") then
-                return "demat"
-            elseif ext:GetData("mat_animation") then
-                return "mat"
-            elseif ext:GetData("failing-demat") then
-                return "demat_fail"
-            elseif ext:GetData("failing-mat") then
-                return "mat_fail"
-            elseif ext:GetData("demat-interrupted") then
-                return "interrupt"
-            elseif ext:GetHandbrake() then
-                return "handbrake"
-            elseif ext:IsTravelling() then
-                return "travel"
+        local s = ext:GetState()
+
+        if s ~= self.last_state then
+            self.last_state = s
+
+            if not self.Textures or not self.Textures[s] then return end
+
+            if mat:GetTexture(self.Texture):GetName() ~= self.Textures[s] then
+                mat:SetTexture(self.Texture, self.Textures[s])
             end
 
-            return "idle"
+            if self.AnimateTextures[s] then
+                self.anim = true
+                self.anim_num_frames = mat:GetTexture(self.Texture):GetNumAnimationFrames()
+                self.anim_frame_rate = self.FrameRates[s]
+                self.anim_frame_dur = self.FrameDurations[s]
+            else
+                self.anim = false
+                self.current_frame = 0
+                mat:SetInt(self.FrameNo, 0)
+            end
         end
 
-        local m = get_base_mat_name()
-
-        if ext:GetWarning() then
-            m = m .. "_warning"
-        end
-
-        if not self.Textures or not self.Textures[m] then return end
-
-        if mat:GetTexture(self.Texture):GetName() ~= self.Textures[m] then
-            mat:SetTexture(self.Texture, self.Textures[m])
-        end
-
-        if self.AnimateTextures[m] then
-            local num_frames = mat:GetTexture(self.Texture):GetNumAnimationFrames()
+        if self.anim then
             local time = RealTime()
 
-            if time > self.next_frame_update then
-                local time_past = time - self.last_frame_update
-                local frames_past = math.floor(time_past / self.FrameDurations[m])
+            if time > self.next_update then
+                local frames_past = math.floor((time - self.last_update) * self.anim_frame_rate)
+                self.current_frame = (self.current_frame + frames_past) % self.anim_num_frames
 
-                self.current_frame = (self.current_frame + frames_past) % num_frames
+                self.last_update = time
+                self.next_update = time + self.anim_frame_dur
 
-                self.last_frame_update = time
-                self.next_frame_update = time + self.FrameDurations[m]
+                mat:SetInt(self.FrameNo, self.current_frame)
             end
-        else
-            self.current_frame = 0
-        end
-
-        if mat:GetInt(self.FrameNo) ~= self.current_frame then
-            mat:SetInt(self.FrameNo, self.current_frame)
         end
     end
 })
@@ -96,10 +92,16 @@ end
 local function matproxy_tardis_power_bind(self, mat, ent)
     if not IsValid(ent) or not IsValid(ent.exterior) or not ent.TardisPart then return end
 
-    local var = ent.exterior:GetPower() and self.on_var or self.off_var
-    if not var then return end
+    local on = ent.exterior:GetPower()
 
-    mat:SetVector(self.ResultTo, mat:GetVector(var))
+    if self.last_on ~= on then
+        self.last_on = on
+
+        local var = on and self.on_var or self.off_var
+        if not var then return end
+
+        mat:SetVector(self.ResultTo, mat:GetVector(var))
+    end
 end
 
 matproxy.Add({
