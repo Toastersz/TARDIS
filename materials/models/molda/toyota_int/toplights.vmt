@@ -30,51 +30,37 @@
 			resultVar "$color2"
 		}
 
-		TARDIS_State {
+		TARDIS_State_Texture {
 			resultTextureVar $basetexture
 			resultFrameVar $frame
 
 			textures {
-				idle "models/molda/toyota_int/bulbs"
-				handbrake "models/molda/toyota_int/bulbs"
-				interrupt "models/molda/toyota_int/bulbs"
-				demat_fail "models/molda/toyota_int/bulbs"
-				mat_fail "models/molda/toyota_int/toplights"
-				travel "models/molda/toyota_int/toplights"
-				demat "models/molda/toyota_int/toplights"
-				mat "models/molda/toyota_int/bulbs"
+				dead "off"
+
 				off "models/molda/toyota_int/toplights_off"
+				idle "models/molda/toyota_int/bulbs"
+				handbrake "idle"
 
-				idle_warning "models/molda/toyota_int/bulbs_half"
-				handbrake_warning "models/molda/toyota_int/bulbs_half"
-				interrupt_warning "models/molda/toyota_int/bulbs_half"
-				demat_fail_warning "models/molda/toyota_int/bulbs_half"
-				mat_fail_warning "models/molda/toyota_int/toplights"
-				travel_warning "models/molda/toyota_int/toplights"
-				demat_warning "models/molda/toyota_int/toplights"
-				mat_warning "models/molda/toyota_int/bulbs"
+				travel { "models/molda/toyota_int/toplights" 10 }
+				takeoff "travel"
+				parking "idle"
+
+				demat_abort "idle"
+				demat_fail "idle"
+				mat_fail "travel"
+
+
 				off_warning "models/molda/toyota_int/bulbs_off"
-			}
-			frameRates {
-				idle 0
-				handbrake 0
-				interrupt 0
-				demat_fail 0
-				mat_fail 10
-				travel 10
-				demat 10
-				mat 0
-				off 0
+				idle_warning "models/molda/toyota_int/bulbs_half"
+				handbrake_warning "idle_warning"
 
-				idle_warning 0
-				handbrake_warning 0
-				interrupt_warning 0
-				demat_fail_warning 0
-				mat_fail_warning 10
-				travel_warning 10
-				demat_warning 10
-				mat_warning 0
-				off_warning 0
+				travel_warning "travel"
+				takeoff_warning "travel"
+				parking_warning "idle"
+
+				demat_abort_warning "idle_warning"
+				demat_fail_warning "idle_warning"
+				mat_fail_warning "travel"
 			}
 		}
 	}

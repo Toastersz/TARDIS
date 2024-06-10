@@ -9,8 +9,7 @@ local function predraw_o(self, part)
 
     render.SuppressEngineLighting(true)
 
-    local br = power and lo.basebrightness or lo.nopowerbrightness
-    local col = power and lo.basebrightnessRGB or lo.nopowerbrightnessRGB
+    local colvec = self:GetBaseLightColorVector()
 
     local parts_table = power and lo.parts or lo.parts_nopower
 
@@ -21,10 +20,8 @@ local function predraw_o(self, part)
         else
             render.ResetModelLighting(part_br, part_br, part_br)
         end
-    elseif col then
-        render.ResetModelLighting(col[1], col[2], col[3])
     else
-        render.ResetModelLighting(br, br, br)
+        render.ResetModelLighting(colvec[1], colvec[2], colvec[3])
     end
 
     --render.SetLightingMode(1)

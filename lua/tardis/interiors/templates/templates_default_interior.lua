@@ -1,52 +1,8 @@
-local function generate_lamps(n, l_brightness, l_fov)
-    local lp = Vector(197, 0, 340)
-    local la = Angle(86.8, 0, 90)
-    local up = Vector(0,0,1)
-
-    local v0 = Vector(0,0,0)
-    local a0 = Angle(0,0,0)
-
-    local ra = 360 / n
-
-    local lamp_positions = {}
-    for i = 1,n do
-        lamp_positions[i] = { pos = v0 + lp, ang = a0 + la, }
-        lp:Rotate(Angle(0,ra,0))
-        la:RotateAroundAxis(up, ra)
-    end
-
-    local lamps = {}
-
-    for i = 1,n do
-        lamps[i] = {
-            color = Color(255, 255, 230),
-            texture = "effects/flashlight/soft",
-            fov = l_fov,
-            distance = 290,
-            brightness = l_brightness,
-            shadows = false,
-            pos = lamp_positions[i].pos,
-            ang = lamp_positions[i].ang,
-            warn = {
-                brightness = l_brightness * 0.5,
-            },
-            states = {
-                ["normal"] = {
-                    enabled = true,
-                    brightness = l_brightness,
-                },
-                ["moving"] = {
-                    enabled = false,
-                },
-            },
-        }
-    end
-
-    return lamps
-end
-
 TARDIS:AddInteriorTemplate("default_lamps", {
     Interior = {
+        Size = {
+            Max = Vector(892.477, 457.64, 800)
+        },
         LightOverride = {
             basebrightness = 0.01,
             parts = {
@@ -60,7 +16,22 @@ TARDIS:AddInteriorTemplate("default_lamps", {
                 default_rings = 0.001,
             },
         },
-        Lamps = generate_lamps(5, 0.6, 165),
+        Lamps = {
+            {
+                color = Color(255, 255, 230),
+                texture = "effects/flashlight/soft",
+                fov = 170,
+                distance = 751,
+                brightness = 5,
+                pos = Vector(0, 0, 790),
+                ang = Angle(90, 90, 180),
+                shadows = false,
+                states = {
+                    ["normal"] = { enabled = true, },
+                    ["moving"] = { enabled = false, },
+                },
+            },
+        },
         Light={
             brightness = 5,
             warn_brightness = 4,
@@ -100,12 +71,6 @@ TARDIS:AddInteriorTemplate("default_lamps", {
                 end
             end,
         },
-    },
-})
-
-TARDIS:AddInteriorTemplate("default_more_lamps", {
-    Interior = {
-        Lamps = generate_lamps(9, 0.5, 150),
     },
 })
 
@@ -229,7 +194,15 @@ TARDIS:AddInteriorTemplate("default_color_update", {
 
 TARDIS:AddInteriorTemplate("default_small_version", {
     Interior = {
-        ExitDistance = 600,
+        Size = {
+            Min = Vector(-555.742, -461.072, 0),
+            Max = Vector(388.574, 371.054, 381.653),
+        },
+        ExitBox = {
+            Min = Vector(-659.914, -564.271, -50),
+            Max = Vector(484.983, 514.944, 385.095),
+        },
+
         Parts = {
             default_rotor = {
                 model = "models/molda/toyota_int/rotor_small.mdl",
@@ -240,6 +213,14 @@ TARDIS:AddInteriorTemplate("default_small_version", {
             default_corridors = {
                 model = "models/molda/toyota_int/corridor_version3.mdl"
             },
+        },
+    },
+})
+
+TARDIS:AddInteriorTemplate("default_small_version_lamp_fix", {
+    Interior = {
+        Size = {
+            Max = Vector(484.983, 514.944, 800)
         },
     },
 })

@@ -48,7 +48,8 @@ T.Interior = {
     },
     LightOverride = {
         basebrightness = 0.3, --Base interior brightness when power is on.
-        nopowerbrightness = 0.05 --Interior brightness with no power. Should always be darker than basebrightness.
+        nopowerbrightness = 0.05, --Interior brightness with no power. Should always be darker than basebrightness.
+        transitionspeed = 1, --Speed of the light transition.
     },
     ScreenDistance = 500,
     ScreensEnabled = true
@@ -86,7 +87,8 @@ T.Exterior = {
         --horizfov = 90, --vertical and horizontal field of view of the light. Will default to portal height and width.
         farz = 750, --FarZ property of the light. Determines how far the light projects.]]
         offset = Vector(-21,0,51.1), --Offset from box origin
-        texture = "effects/flashlight/square" --Texture the projected light will use. You can get these from the Lamp tool.
+        texture = "effects/flashlight/square", --Texture the projected light will use. You can get these from the Lamp tool.
+        baselightmix = 0, --How much the base light affects the projected light. 0 = none, 1 = full.
     },
     Sounds = {
         Teleport = {
@@ -176,9 +178,11 @@ T.Exterior = {
     }
 }
 T.Timings = {
-    DematInterrupt = 1,
+    DematAbortState = 1,
     DematFail = 4,
     MatFail = 8,
+    TakeOffState = 0,
+    ParkingState = 0,
 }
 
 TARDIS:AddInterior(T)
