@@ -227,17 +227,17 @@ if SERVER then
     end)
 
     ENT:AddHook("BodygroupChanged","doors",function(self,bodygroup,value)
-        if self.metadata.SyncExteriorBodygroupToDoors then return end
+        if not self.metadata.SyncExteriorBodygroupToDoors then return end
         if self:IsChameleonActive() then return end
 
         local door=TARDIS:GetPart(self,"door")
         local intdoor=TARDIS:GetPart(self.interior,"door")
 
-        if IsValid(door) then
+        if IsValid(door) and door:GetBodygroup(bodygroup) ~= value then
             door:SetBodygroup(bodygroup,value)
         end
 
-        if IsValid(intdoor) then
+        if IsValid(intdoor)  and door:GetBodygroup(bodygroup) ~= value then
             intdoor:SetBodygroup(bodygroup,value)
         end
     end)
